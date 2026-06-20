@@ -16,6 +16,7 @@ const { segundos } = useTimer(
 const editando = ref(false)
 const nomeEdit = ref(props.tarefa.nome)
 const carregando = ref(false)
+const confirmandoDelete = ref(false)
 
 async function acao(fn: () => Promise<void>) {
   if (carregando.value) return
@@ -67,8 +68,24 @@ async function salvarNome() {
       {{ formatarTempo(segundos) }}
     </span>
 
+    <!-- Confirmação de delete inline -->
+    <div v-if="confirmandoDelete" class="flex items-center gap-1">
+      <span class="text-xs text-red-400 mr-1">apagar?</span>
+      <button
+        @click="acao(() => store.deletar(workspaceId, tarefa.id))"
+        :disabled="carregando"
+        class="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition disabled:opacity-40"
+        title="Confirmar"
+      >✓</button>
+      <button
+        @click="confirmandoDelete = false"
+        class="px-2 py-1 text-xs rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+        title="Cancelar"
+      >✗</button>
+    </div>
+
     <!-- Botões de ação -->
-    <div class="flex items-center gap-1 transition opacity-100 md:opacity-0 md:group-hover:opacity-100">
+    <div v-else class="flex items-center gap-1 transition opacity-100 md:opacity-0 md:group-hover:opacity-100">
       <template v-if="tarefa.estado === 'IDLE'">
         <button
           @click="acao(() => store.iniciarTimer(workspaceId, tarefa.id))"
@@ -116,6 +133,13 @@ async function salvarNome() {
           title="Reativar"
         >↺</button>
       </template>
+
+      <button
+        @click="confirmandoDelete = true"
+        :disabled="carregando"
+        class="px-2 py-1 text-xs rounded-lg text-feitu-text/30 hover:text-red-400 hover:bg-red-50 transition disabled:opacity-40"
+        title="Deletar"
+      >✕</button>
     </div>
   </div>
 </template>
