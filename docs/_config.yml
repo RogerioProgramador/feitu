@@ -1,6 +1,6 @@
 title: Feitu
 description: App de checklist diário com timer integrado
-theme: cayman
+theme: jekyll-theme-cayman
 
 url: "https://rogeriioprogramador.github.io"
 baseurl: "/feitu"
