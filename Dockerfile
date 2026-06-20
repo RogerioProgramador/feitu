@@ -25,6 +25,6 @@ COPY --from=backend-build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENV JAVA_OPTS="-Xmx128m -Xms64m -XX:+UseContainerSupport"
+ENV JAVA_OPTS="-XX:+UseContainerSupport -Xmx192m -Xms32m -XX:+UseSerialGC -Xss256k -XX:MaxMetaspaceSize=96m"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
