@@ -7,6 +7,7 @@ primary_region = "gru"
 [env]
   H2_CONSOLE_ENABLED = "false"
   SPRING_PROFILES_ACTIVE = "prod"
+  DB_PATH = "/data/feitu"
 
 [[mounts]]
   source = "feitu_data"
