@@ -30,7 +30,7 @@ function sair() {
         <RouterLink to="/analytics" class="text-sm text-feitu-text/60 hover:text-feitu-text py-3 px-1 -my-3">
           Resumo
         </RouterLink>
-        <button @click="sair" class="text-sm text-feitu-text/60 hover:text-feitu-text py-3 px-2 -my-3">
+        <button @click="sair" class="text-sm text-feitu-text/60 hover:text-feitu-text py-3 px-3 -my-3">
           Sair
         </button>
       </div>
