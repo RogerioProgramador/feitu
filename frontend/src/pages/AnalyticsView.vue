@@ -120,7 +120,7 @@ function proximoDia() {
         <p class="text-xs font-medium text-feitu-text/50 mb-3">Timeline</p>
         <div class="space-y-2">
           <div
-            v-for="item in resumo.timeline"
+            v-for="(item, idx) in resumo.timeline"
             :key="item.inicio"
             class="flex items-start gap-3"
           >
@@ -129,7 +129,12 @@ function proximoDia() {
               :style="{ backgroundColor: item.workspaceCor ?? '#A7C7E7' }"
             />
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-feitu-text truncate">{{ item.tarefaNome }}</p>
+              <p
+                class="text-sm truncate"
+                :class="idx > 0 && resumo.timeline[idx - 1].tarefaId === item.tarefaId
+                  ? 'text-feitu-text/50 italic'
+                  : 'text-feitu-text'"
+              >{{ item.tarefaNome }}</p>
               <p class="text-xs text-feitu-text/50 font-mono">
                 {{ horaMinuto(item.inicio) }} – {{ horaMinuto(item.fim) }}
               </p>

@@ -28,6 +28,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   const token = localStorage.getItem('feitu_token')
   if (!to.meta.public && !token) return { path: '/login', replace: true }
+  if (to.meta.public && token) return { path: '/workspaces', replace: true }
 })
 
 export default router

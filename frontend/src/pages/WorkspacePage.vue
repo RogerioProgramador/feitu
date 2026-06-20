@@ -27,10 +27,10 @@ function sair() {
     <header class="flex items-center justify-between px-4 pt-4 pb-2">
       <h1 class="text-xl font-semibold text-feitu-text">Feitu</h1>
       <div class="flex items-center gap-3">
-        <RouterLink to="/analytics" class="text-sm text-feitu-text/60 hover:text-feitu-text">
+        <RouterLink to="/analytics" class="text-sm text-feitu-text/60 hover:text-feitu-text py-3 px-1 -my-3">
           Resumo
         </RouterLink>
-        <button @click="sair" class="text-sm text-feitu-text/60 hover:text-feitu-text">
+        <button @click="sair" class="text-sm text-feitu-text/60 hover:text-feitu-text py-3 px-2 -my-3">
           Sair
         </button>
       </div>

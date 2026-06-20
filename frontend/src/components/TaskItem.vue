@@ -52,7 +52,7 @@ async function salvarNome() {
       />
       <span
         v-else
-        @dblclick="editando = true"
+        @click="editando = true"
         class="text-sm text-feitu-text truncate block cursor-text"
       >
         {{ tarefa.nome }}
@@ -68,7 +68,7 @@ async function salvarNome() {
     </span>
 
     <!-- Botões de ação -->
-    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+    <div class="flex items-center gap-1 transition opacity-100 md:opacity-0 md:group-hover:opacity-100">
       <template v-if="tarefa.estado === 'IDLE'">
         <button
           @click="acao(() => store.iniciarTimer(workspaceId, tarefa.id))"
