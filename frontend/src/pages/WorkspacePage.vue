@@ -18,7 +18,7 @@ onMounted(() => wsStore.carregar())
 
 function sair() {
   authStore.logout()
-  router.push('/login')
+  router.replace('/login')
 }
 </script>
 

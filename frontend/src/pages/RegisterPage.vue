@@ -25,7 +25,7 @@ async function criar() {
   carregando.value = true
   try {
     await auth.register(email.value, senha.value)
-    router.push('/workspaces')
+    router.replace('/workspaces')
   } catch (e: any) {
     erro.value = e.response?.data?.detail ?? 'Erro ao criar conta'
   } finally {

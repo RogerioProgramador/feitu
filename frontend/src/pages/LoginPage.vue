@@ -16,7 +16,7 @@ async function entrar() {
   carregando.value = true
   try {
     await auth.login(email.value, senha.value)
-    router.push('/workspaces')
+    router.replace('/workspaces')
   } catch (e: any) {
     erro.value = e.response?.data?.detail ?? 'Credenciais inválidas'
   } finally {

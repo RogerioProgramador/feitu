@@ -40,8 +40,10 @@ public class SegmentoTempoService {
     public long calcularTempoTotalSegundos(UUID tarefaId) {
         List<SegmentoTempo> segmentos = segmentoRepository.findByTarefaId(tarefaId);
         return segmentos.stream()
-                .filter(s -> s.getFim() != null)
-                .mapToLong(s -> Duration.between(s.getInicio(), s.getFim()).getSeconds())
+                .mapToLong(s -> {
+                    Instant fim = s.getFim() != null ? s.getFim() : Instant.now();
+                    return Duration.between(s.getInicio(), fim).getSeconds();
+                })
                 .sum();
     }
 }

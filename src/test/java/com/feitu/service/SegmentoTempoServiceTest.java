@@ -61,10 +61,10 @@ class SegmentoTempoServiceTest {
     }
 
     @Test
-    void calcularTempoIgnoraSegmentosAbertos() {
+    void calcularTempoIncluiSegmentoAberto() {
         SegmentoTempo fechado = new SegmentoTempo();
         fechado.setInicio(Instant.now().minusSeconds(60));
-        fechado.setFim(Instant.now().minusSeconds(0));
+        fechado.setFim(Instant.now());
 
         SegmentoTempo aberto = new SegmentoTempo();
         aberto.setInicio(Instant.now().minusSeconds(10));
@@ -73,6 +73,7 @@ class SegmentoTempoServiceTest {
 
         long total = service.calcularTempoTotalSegundos(tarefaId);
 
-        assertThat(total).isGreaterThan(0).isLessThanOrEqualTo(60);
+        // fechado ~60s + aberto ~10s = ~70s
+        assertThat(total).isGreaterThanOrEqualTo(69).isLessThanOrEqualTo(72);
     }
 }
