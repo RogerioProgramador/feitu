@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desenvolvimento — Feitu Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="logo-link">
+        <div class="logo-mark">✓</div>
+        <div class="logo-info">
+          <span class="logo-name">Feitu</span>
+          <span class="logo-sub">Documentação</span>
+        </div>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Guias</div>
+      <a href="index.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Início
+      </a>
+      <a href="como-funciona.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Como funciona
+      </a>
+      <div class="nav-label">Referência</div>
+      <a href="arquitetura.html" class="nav-link">
+        <span class="nav-dot" style="background:#FFDAC1"></span>Arquitetura
+      </a>
+      <a href="api.html" class="nav-link">
+        <span class="nav-dot" style="background:#E2C6FF"></span>API Reference
+      </a>
+      <div class="nav-label">DevOps</div>
+      <a href="desenvolvimento.html" class="nav-link active">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Desenvolvimento
+      </a>
+      <a href="deploy.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Deploy
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="https://github.com/RogerioProgramador/feitu" class="gh-btn" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="page-head">
+        <div class="badge badge-blue">DevOps</div>
+        <h1 class="title">Desenvolvimento local</h1>
+        <p class="desc">Como configurar o ambiente, rodar o projeto, executar testes e adicionar novas features.</p>
+      </div>
+
+      <h2 class="first">Pré-requisitos</h2>
+
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Ferramenta</th><th>Versão mínima</th><th>Verificar</th></tr></thead>
+          <tbody>
+            <tr><td>Java</td><td>21</td><td><code>java -version</code></td></tr>
+            <tr><td>Maven</td><td>3.9</td><td><code>mvn -version</code></td></tr>
+            <tr><td>Node.js</td><td>20</td><td><code>node -v</code></td></tr>
+            <tr><td>npm</td><td>10</td><td><code>npm -v</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-blue">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><p>O projeto foi desenvolvido com <strong>Java 25</strong> e Mockito em modo experimental (<code>-Dnet.bytebuddy.experimental=true</code> já configurado no <code>pom.xml</code>). Funciona normalmente com Java 21+.</p></div>
+      </div>
+
+      <h2>Setup inicial</h2>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">bash</span>
+        </div>
+        <pre>git clone git@github.com:RogerioProgramador/feitu.git
+cd feitu
+cd frontend && npm install && cd ..</pre>
+      </div>
+
+      <h2>Rodando em desenvolvimento</h2>
+
+      <p>Você precisa de dois terminais abertos simultaneamente:</p>
+
+      <h3>Terminal 1 — Backend</h3>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">Backend — porta 8080</span>
+        </div>
+        <pre>mvn spring-boot:run -P backend-only -Dspring-boot.run.profiles=dev</pre>
+      </div>
+
+      <p>O Spring Boot sobe na porta <strong>8080</strong>. O H2 usa banco em arquivo <code>./data/feitu.mv.db</code> (criado automaticamente). Console H2: <code>http://localhost:8080/h2-console</code> com JDBC URL <code>jdbc:h2:file:./data/feitu</code>.</p>
+
+      <h3>Terminal 2 — Frontend</h3>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">Frontend — porta 5173</span>
+        </div>
+        <pre>cd frontend
+npm run dev</pre>
+      </div>
+
+      <p>O Vite sobe na porta <strong>5173</strong> com hot-reload. O proxy <code>/api → localhost:8080</code> está configurado em <code>vite.config.ts</code>.</p>
+
+      <div class="callout callout-teal">
+        <span class="callout-icon">🌐</span>
+        <div class="callout-body"><p>Acesse <strong>http://localhost:5173</strong></p></div>
+      </div>
+
+      <h2>Testes</h2>
+
+      <h3>Backend</h3>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">bash</span>
+        </div>
+        <pre># Todos os testes (unitários + integração)
+mvn verify -P backend-only
+
+# Só compilar, sem testes
+mvn compile -P backend-only</pre>
+      </div>
+
+      <p>Os testes de integração usam H2 in-memory (perfil <code>test</code>) e <code>@DirtiesContext</code> para isolamento entre suítes.</p>
+
+      <h3>Frontend</h3>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">bash</span>
+        </div>
+        <pre>cd frontend
+npm run typecheck   # verificação de tipos TypeScript
+npm run test        # Vitest</pre>
+      </div>
+
+      <h2>Build do artefato único</h2>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">bash</span>
+        </div>
+        <pre># Compila frontend + backend, gera jar com tudo embutido
+mvn package
+
+# Rode localmente
+java -jar target/feitu-0.0.1-SNAPSHOT.jar</pre>
+      </div>
+
+      <p>O Maven Exec Plugin roda <code>npm ci &amp;&amp; npm run build</code> em <code>frontend/</code> antes de compilar o Java. O resultado em <code>frontend/dist/</code> é copiado para <code>src/main/resources/static/</code> e embutido no jar.</p>
+
+      <h2>Critério de done</h2>
+
+      <p>Uma funcionalidade está pronta quando:</p>
+
+      <ul class="done-list">
+        <li><span class="done-num">1</span><span><code>mvn verify -P backend-only</code> passa — compile + todos os testes</span></li>
+        <li><span class="done-num">2</span><span><code>npm run typecheck</code> passa — sem erros de tipo TypeScript</span></li>
+        <li><span class="done-num">3</span><span>A funcionalidade está manualmente verificável via UI ou API</span></li>
+      </ul>
+
+      <h2>Variáveis de ambiente (desenvolvimento)</h2>
+
+      <p>Em desenvolvimento, valores padrão são usados automaticamente via <code>application.properties</code>:</p>
+
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Variável</th><th>Padrão em dev</th></tr></thead>
+          <tbody>
+            <tr><td><code>JWT_SECRET</code></td><td><code>dev-secret-...</code> (32+ chars)</td></tr>
+            <tr><td><code>JWT_EXPIRATION_MS</code></td><td><code>86400000</code> (24h)</td></tr>
+            <tr><td><code>VAPID_PUBLIC_KEY</code></td><td>vazio (push desabilitado)</td></tr>
+            <tr><td><code>VAPID_PRIVATE_KEY</code></td><td>vazio</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Para habilitar o console H2 em dev:</p>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div>
+          <span class="term-title">bash</span>
+        </div>
+        <pre>mvn spring-boot:run -P backend-only \
+  -Dspring-boot.run.profiles=dev \
+  -Dspring.h2.console.enabled=true</pre>
+      </div>
+
+      <h2>Estrutura de testes</h2>
+
+      <pre>src/test/java/com/feitu/
+├── security/
+│   └── JwtServiceTest.java           # unitário — geração e validação de tokens
+├── service/
+│   ├── AuthServiceTest.java          # unitário — Mockito
+│   ├── WorkspaceServiceTest.java     # unitário — Mockito
+│   ├── TarefaServiceTest.java        # unitário — máquina de estados
+│   ├── SegmentoTempoServiceTest.java
+│   ├── AnalyticsServiceTest.java
+│   └── DailyReviewSchedulerTest.java
+└── controller/
+    ├── AuthControllerTest.java       # integração — MockMvc + H2 in-memory
+    └── WorkspaceControllerTest.java  # integração — MockMvc + H2 in-memory
+
+frontend/src/pages/
+├── LoginPage.test.ts                 # Vitest + @vue/test-utils
+└── RegisterPage.test.ts</pre>
+
+      <h2>Adicionando uma nova feature</h2>
+
+      <ol class="steps">
+        <li>Defina a entidade em <code>domain/</code> e o repositório em <code>repository/</code></li>
+        <li>Implemente o serviço em <code>service/</code> com testes unitários Mockito</li>
+        <li>Exponha via controller em <code>controller/</code> com testes MockMvc</li>
+        <li>Adicione os tipos em <code>frontend/src/types/index.ts</code></li>
+        <li>Crie a API client em <code>frontend/src/api/</code></li>
+        <li>Implemente a store Pinia em <code>frontend/src/stores/</code></li>
+        <li>Crie os componentes/páginas em <code>components/</code> ou <code>pages/</code></li>
+        <li>Verifique: <code>mvn verify -P backend-only</code> + <code>npm run typecheck</code> + <code>npm run test</code></li>
+      </ol>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitetura — Feitu Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="logo-link">
+        <div class="logo-mark">✓</div>
+        <div class="logo-info">
+          <span class="logo-name">Feitu</span>
+          <span class="logo-sub">Documentação</span>
+        </div>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Guias</div>
+      <a href="index.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Início
+      </a>
+      <a href="como-funciona.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Como funciona
+      </a>
+      <div class="nav-label">Referência</div>
+      <a href="arquitetura.html" class="nav-link active">
+        <span class="nav-dot" style="background:#FFDAC1"></span>Arquitetura
+      </a>
+      <a href="api.html" class="nav-link">
+        <span class="nav-dot" style="background:#E2C6FF"></span>API Reference
+      </a>
+      <div class="nav-label">DevOps</div>
+      <a href="desenvolvimento.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Desenvolvimento
+      </a>
+      <a href="deploy.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Deploy
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="https://github.com/RogerioProgramador/feitu" class="gh-btn" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="page-head">
+        <div class="badge badge-peach">Referência</div>
+        <h1 class="title">Arquitetura</h1>
+        <p class="desc">Stack, layout de pacotes, modelo de dados, segurança e build integrado.</p>
+      </div>
+
+      <h2 class="first">Visão geral</h2>
+
+      <p>O Feitu é empacotado como um <strong>único artefato <code>.jar</code></strong>. O Maven compila o frontend Vue com <code>npm run build</code> durante o build, copia o <code>dist/</code> para <code>src/main/resources/static/</code>, e o Spring Boot serve tudo — frontend estático e API REST — no mesmo processo na porta 8080.</p>
+
+      <pre>Browser / PWA
+      │
+      │  HTTPS (prod) / HTTP (dev proxy)
+      ▼
+┌─────────────────────────────┐
+│   Spring Boot (porta 8080)  │
+│                             │
+│  ┌─────────────────────┐    │
+│  │  /api/**  → REST    │    │
+│  └─────────────────────┘    │
+│  ┌─────────────────────┐    │
+│  │  /**  → static Vue  │    │
+│  └─────────────────────┘    │
+│                             │
+│  ┌─────────────────────┐    │
+│  │  H2 file-based DB   │    │
+│  │  ./data/feitu.mv.db │    │
+│  └─────────────────────┘    │
+└─────────────────────────────┘</pre>
+
+      <p>Em desenvolvimento, o Vite roda na porta 5173 com proxy <code>/api → localhost:8080</code>, permitindo hot-reload do frontend sem rebuild do jar.</p>
+
+      <h2>Stack</h2>
+
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Camada</th><th>Tecnologia</th><th>Versão</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td>Java + Spring Boot</td><td>21 / 3.3.5</td></tr>
+            <tr><td>ORM</td><td>Spring Data JPA + Hibernate</td><td>—</td></tr>
+            <tr><td>Banco</td><td>H2 file-based (prod), in-memory (test)</td><td>2.x</td></tr>
+            <tr><td>Auth</td><td>Spring Security + JWT</td><td>jjwt 0.12.6</td></tr>
+            <tr><td>Push</td><td>nl.martijndwars:web-push + VAPID</td><td>5.1.1</td></tr>
+            <tr><td>Build</td><td>Maven</td><td>3.9+</td></tr>
+            <tr><td>Frontend</td><td>Vue 3 + Vite + TypeScript</td><td>3.5 / 8.x / 6.x</td></tr>
+            <tr><td>CSS</td><td>Tailwind CSS</td><td>3.4</td></tr>
+            <tr><td>State</td><td>Pinia</td><td>3.x</td></tr>
+            <tr><td>Routing</td><td>Vue Router</td><td>4.x</td></tr>
+            <tr><td>HTTP client</td><td>Axios</td><td>1.x</td></tr>
+            <tr><td>PWA</td><td>vite-plugin-pwa</td><td>1.x</td></tr>
+            <tr><td>Testes BE</td><td>JUnit 5 + Mockito + MockMvc + H2</td><td>—</td></tr>
+            <tr><td>Testes FE</td><td>Vitest + @vue/test-utils</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Layout de pacotes — Backend</h2>
+
+      <pre>com.feitu/
+├── FeituApplication.java          # main — spring boot entry point
+├── config/
+│   ├── SecurityConfig.java        # JWT filter, CORS, rotas públicas/protegidas
+│   ├── GlobalExceptionHandler.java # @RestControllerAdvice → ProblemDetail
+│   ├── WebConfig.java             # SPA fallback (index.html para rotas Vue Router)
+│   ├── BusinessException.java
+│   └── ResourceNotFoundException.java
+├── controller/
+│   ├── AuthController.java        # /api/auth/register, /login
+│   ├── WorkspaceController.java   # /api/workspaces
+│   ├── TarefaController.java      # /api/workspaces/{id}/tarefas + /api/tarefas/{id}/*
+│   ├── AnalyticsController.java   # /api/analytics/daily
+│   ├── PushController.java        # /api/push/subscribe, /unsubscribe
+│   └── UsuarioController.java     # /api/usuarios/me
+├── domain/
+│   ├── Usuario.java
+│   ├── Workspace.java
+│   ├── Tarefa.java
+│   ├── TarefaEstado.java          # enum: IDLE, RUNNING, PAUSED, DONE
+│   ├── SegmentoTempo.java
+│   └── PushSubscription.java
+├── dto/                           # todos são Java records
+│   ├── RegisterRequest / LoginRequest / AuthResponse
+│   ├── WorkspaceRequest / WorkspaceResponse / ReorderRequest
+│   ├── TarefaRequest / TarefaResponse / RenomearRequest
+│   ├── DailySummaryResponse / WorkspaceSummary / TimelineItem
+│   ├── SubscribeRequest / UnsubscribeRequest
+│   └── NotificacaoConfigRequest / UsuarioResponse
+├── repository/
+│   ├── UsuarioRepository
+│   ├── WorkspaceRepository
+│   ├── TarefaRepository
+│   ├── SegmentoTempoRepository
+│   └── PushSubscriptionRepository
+├── security/
+│   ├── JwtService.java            # geração e validação HMAC-SHA256
+│   ├── JwtAuthFilter.java         # OncePerRequestFilter
+│   └── UserDetailsServiceImpl.java
+├── service/
+│   ├── AuthService.java
+│   ├── WorkspaceService.java
+│   ├── TarefaService.java         # máquina de estados do timer
+│   ├── SegmentoTempoService.java  # abrir/fechar segmentos, calcular total
+│   ├── AnalyticsService.java
+│   ├── PushSubscriptionService.java
+│   └── UsuarioService.java
+├── notification/
+│   └── PushNotificationService.java  # VAPID, remove subscriptions mortas
+└── scheduler/
+    └── DailyReviewScheduler.java     # @Scheduled por minuto</pre>
+
+      <h2>Layout de pacotes — Frontend</h2>
+
+      <pre>frontend/src/
+├── main.ts                   # createApp + Pinia + Router + diretiva v-focus
+├── App.vue                   # &lt;RouterView /&gt; apenas
+├── style.css                 # @tailwind base/components/utilities + body
+├── api/
+│   ├── http.ts               # instância Axios: Bearer token + redirect 401
+│   ├── workspaceApi.ts
+│   ├── tarefaApi.ts
+│   └── analyticsApi.ts
+├── composables/
+│   ├── useAuth.ts            # wrap do authStore com logout + router
+│   └── useTimer.ts           # tick reativo: setInterval local quando RUNNING
+├── components/
+│   ├── TabBar.vue            # abas de workspace + criação inline
+│   ├── TaskList.vue          # lista tarefas ativas + botão nova tarefa
+│   ├── TaskItem.vue          # item com timer, botões de ação, edição de nome
+│   └── CompletedSection.vue  # seção recolhível de tarefas concluídas
+├── pages/
+│   ├── LoginPage.vue
+│   ├── RegisterPage.vue
+│   ├── WorkspacePage.vue     # shell principal: header + TabBar + TaskList
+│   └── AnalyticsView.vue     # resumo do dia: total, barras, timeline
+├── router/
+│   └── index.ts              # rotas + guard de autenticação
+├── stores/
+│   ├── authStore.ts          # token + email em localStorage
+│   ├── workspaceStore.ts
+│   └── tarefaStore.ts        # indexed por workspaceId
+├── types/
+│   └── index.ts              # interfaces TypeScript espelhando DTOs do backend
+└── utils/
+    ├── formatarTempo.ts      # segundos → "HH:MM:SS"
+    └── formatarData.ts       # ISO → "DD/MM/YYYY", hojeISO()</pre>
+
+      <h2>Modelo de dados</h2>
+
+      <pre>Usuario
+  id               UUID  PK
+  email            VARCHAR UNIQUE
+  senha_hash       VARCHAR
+  criado_em        TIMESTAMP
+  horario_notif    TIME  DEFAULT '22:00'
+  ultima_notif_em  DATE  (deduplicação de push)
+
+Workspace
+  id          UUID  PK
+  nome        VARCHAR
+  cor         VARCHAR  (hex, ex: #A7C7E7)
+  ordem       INT
+  usuario_id  UUID  FK → Usuario
+
+Tarefa
+  id            UUID  PK
+  nome          VARCHAR
+  estado        ENUM(IDLE, RUNNING, PAUSED, DONE)
+  workspace_id  UUID  FK → Workspace
+  criado_em     TIMESTAMP
+  concluido_em  TIMESTAMP  (null se não concluída)
+
+SegmentoTempo
+  id        UUID  PK
+  tarefa_id UUID  FK → Tarefa
+  inicio    TIMESTAMP WITH TIME ZONE
+  fim       TIMESTAMP WITH TIME ZONE  (null = segmento aberto / timer rodando)
+
+PushSubscription
+  id          UUID  PK
+  usuario_id  UUID  FK → Usuario
+  endpoint    VARCHAR(512)
+  p256dh      VARCHAR
+  auth        VARCHAR
+  UNIQUE (usuario_id, endpoint)</pre>
+
+      <h2>Segurança</h2>
+
+      <ul>
+        <li>Todas as rotas <code>/api/**</code> são protegidas por JWT, exceto <code>/api/auth/**</code> e <code>/actuator/health</code></li>
+        <li><code>JwtAuthFilter</code> extrai o token do header <code>Authorization: Bearer &lt;token&gt;</code> e popula o <code>SecurityContext</code></li>
+        <li>Sessão <strong>STATELESS</strong> — sem cookies, sem <code>HttpSession</code></li>
+        <li>CORS configurado para <code>localhost:5173</code> (dev) e <code>*.fly.dev</code> (prod)</li>
+        <li>Erros de autenticação retornam <code>401</code> sem redirect</li>
+        <li>Senhas com <strong>BCrypt</strong></li>
+      </ul>
+
+      <h2>Build integrado</h2>
+
+      <p>O <code>pom.xml</code> tem dois profiles:</p>
+
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Profile</th><th>Comportamento</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>(padrão)</code></td>
+              <td>Executa <code>npm ci &amp;&amp; npm run build</code> em <code>frontend/</code>, copia <code>dist/</code> para <code>static/</code></td>
+            </tr>
+            <tr>
+              <td><code>backend-only</code></td>
+              <td>Pula o build do frontend — para desenvolvimento e CI backend</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>O <code>WebConfig.java</code> adiciona um fallback SPA: qualquer rota não encontrada em <code>static/</code> retorna <code>index.html</code>, permitindo que o Vue Router gerencie as rotas do lado do cliente.</p>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

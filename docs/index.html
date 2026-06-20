@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feitu — Checklist com timer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="logo-link">
+        <div class="logo-mark">✓</div>
+        <div class="logo-info">
+          <span class="logo-name">Feitu</span>
+          <span class="logo-sub">Documentação</span>
+        </div>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Guias</div>
+      <a href="index.html" class="nav-link active">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Início
+      </a>
+      <a href="como-funciona.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Como funciona
+      </a>
+      <div class="nav-label">Referência</div>
+      <a href="arquitetura.html" class="nav-link">
+        <span class="nav-dot" style="background:#FFDAC1"></span>Arquitetura
+      </a>
+      <a href="api.html" class="nav-link">
+        <span class="nav-dot" style="background:#E2C6FF"></span>API Reference
+      </a>
+      <div class="nav-label">DevOps</div>
+      <a href="desenvolvimento.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Desenvolvimento
+      </a>
+      <a href="deploy.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Deploy
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="https://github.com/RogerioProgramador/feitu" class="gh-btn" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="page-head">
+        <div class="badge badge-blue">Feitu</div>
+        <h1 class="title">Checklist com timer</h1>
+        <p class="desc">Ao invés de só marcar tarefas como feitas, você também cronometra cada uma — e ao final do dia tem um resumo real de onde foi o seu tempo.</p>
+      </div>
+
+      <h2 class="first">O que você pode fazer</h2>
+
+      <div class="feature-grid">
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>Workspaces</strong> para organizar tarefas por contexto — Trabalho, Estudos, Projetos Pessoais</span>
+        </div>
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>Adicione tarefas</strong> com um clique dentro de cada workspace</span>
+        </div>
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>Timer por tarefa</strong> — inicie, pause e pare individualmente</span>
+        </div>
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>Resumo do dia</strong> — total de horas, tempo por workspace, timeline cronológica</span>
+        </div>
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>Notificação push</strong> no horário configurado lembrando de fazer o resumo</span>
+        </div>
+        <div class="fcard">
+          <div class="fcard-check">✓</div>
+          <span class="fcard-text"><strong>PWA</strong> — instale no celular ou desktop, funciona offline para visualização</span>
+        </div>
+      </div>
+
+      <h2>Fluxo básico</h2>
+
+      <ol class="steps">
+        <li>Crie um workspace <span style="background:rgba(0,0,0,0.04);padding:1px 7px;border-radius:4px;font-family:monospace;font-size:13px">"Trabalho"</span></li>
+        <li>Adicione uma tarefa <span style="background:rgba(0,0,0,0.04);padding:1px 7px;border-radius:4px;font-family:monospace;font-size:13px">"Revisar PRs"</span></li>
+        <li>Clique <strong>▶</strong> para iniciar o timer</li>
+        <li>Clique <strong>⏸</strong> para pausar — o timer para e retoma de onde parou</li>
+        <li>Clique <strong>⏹</strong> para concluir — tarefa vai para a seção "Concluídas"</li>
+        <li>Repita ao longo do dia conforme trabalha</li>
+        <li>Acesse o <strong>Resumo</strong> para ver o que foi feito e quanto tempo levou</li>
+      </ol>
+
+      <h2>Paleta visual</h2>
+
+      <p>Cada cor tem um papel específico na interface:</p>
+
+      <div class="t-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Cor</th><th>Uso</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Background</td>
+              <td><span class="swatch" style="background:#F9F6F0"></span><code>#F9F6F0</code></td>
+              <td>Fundo geral</td>
+            </tr>
+            <tr>
+              <td>Blue</td>
+              <td><span class="swatch" style="background:#A7C7E7"></span><code>#A7C7E7</code></td>
+              <td>Workspaces / destaque</td>
+            </tr>
+            <tr>
+              <td>Teal</td>
+              <td><span class="swatch" style="background:#B5EAD7"></span><code>#B5EAD7</code></td>
+              <td>Tarefas concluídas</td>
+            </tr>
+            <tr>
+              <td>Peach</td>
+              <td><span class="swatch" style="background:#FFDAC1"></span><code>#FFDAC1</code></td>
+              <td>Timer ativo</td>
+            </tr>
+            <tr>
+              <td>Lavender</td>
+              <td><span class="swatch" style="background:#E2C6FF"></span><code>#E2C6FF</code></td>
+              <td>Analytics / gráficos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Links rápidos</h2>
+
+      <div class="links-grid">
+        <a href="como-funciona.html" class="lcard lt-teal">
+          <div class="lcard-title">Como funciona</div>
+          <div class="lcard-desc">Estados do timer, modelo de dados, notificações push, PWA</div>
+          <div class="lcard-arrow">→</div>
+        </a>
+        <a href="arquitetura.html" class="lcard lt-peach">
+          <div class="lcard-title">Arquitetura</div>
+          <div class="lcard-desc">Stack, pacotes, banco de dados, segurança, build integrado</div>
+          <div class="lcard-arrow">→</div>
+        </a>
+        <a href="api.html" class="lcard lt-lavender">
+          <div class="lcard-title">API Reference</div>
+          <div class="lcard-desc">Todos os endpoints REST documentados com exemplos JSON</div>
+          <div class="lcard-arrow">→</div>
+        </a>
+        <a href="desenvolvimento.html" class="lcard lt-blue">
+          <div class="lcard-title">Desenvolvimento</div>
+          <div class="lcard-desc">Como rodar localmente, testes, estrutura, nova feature</div>
+          <div class="lcard-arrow">→</div>
+        </a>
+        <a href="deploy.html" class="lcard lt-teal">
+          <div class="lcard-title">Deploy</div>
+          <div class="lcard-desc">Passo a passo para produção no Fly.io com CI/CD automático</div>
+          <div class="lcard-arrow">→</div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

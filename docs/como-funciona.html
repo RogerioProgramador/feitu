@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Como funciona — Feitu Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="logo-link">
+        <div class="logo-mark">✓</div>
+        <div class="logo-info">
+          <span class="logo-name">Feitu</span>
+          <span class="logo-sub">Documentação</span>
+        </div>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Guias</div>
+      <a href="index.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Início
+      </a>
+      <a href="como-funciona.html" class="nav-link active">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Como funciona
+      </a>
+      <div class="nav-label">Referência</div>
+      <a href="arquitetura.html" class="nav-link">
+        <span class="nav-dot" style="background:#FFDAC1"></span>Arquitetura
+      </a>
+      <a href="api.html" class="nav-link">
+        <span class="nav-dot" style="background:#E2C6FF"></span>API Reference
+      </a>
+      <div class="nav-label">DevOps</div>
+      <a href="desenvolvimento.html" class="nav-link">
+        <span class="nav-dot" style="background:#A7C7E7"></span>Desenvolvimento
+      </a>
+      <a href="deploy.html" class="nav-link">
+        <span class="nav-dot" style="background:#B5EAD7"></span>Deploy
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="https://github.com/RogerioProgramador/feitu" class="gh-btn" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="page-head">
+        <div class="badge badge-teal">Guias</div>
+        <h1 class="title">Como funciona</h1>
+        <p class="desc">Workspaces, ciclo de vida do timer, cálculo de tempo, analytics e notificações push.</p>
+      </div>
+
+      <h2 class="first">Workspaces</h2>
+
+      <p>Workspaces são abas de organização. Cada workspace tem um <strong>nome</strong> e uma <strong>cor</strong>, e contém suas próprias tarefas. Você pode ter quantos quiser — a sugestão é separar por contexto: Trabalho, Estudos, Projetos Pessoais.</p>
+      <p>A ordem dos workspaces pode ser reorganizada arrastando as abas. A nova ordem é persistida automaticamente no backend.</p>
+
+      <h2>Ciclo de vida do timer</h2>
+
+      <p>Cada tarefa tem um <strong>estado</strong> que controla o que pode acontecer com ela:</p>
+
+      <pre>        ┌──────────────────────────────┐
+        │                              │
+        ▼                              │  reativar
+      IDLE ──▶ RUNNING ──▶ PAUSED     │
+                  │           │        │
+                  └─────┬─────┘        │
+                        │ parar        │
+                        ▼             │
+                       DONE ──────────┘</pre>
+
+      <div class="t-wrap" style="margin-top:20px">
+        <table>
+          <thead>
+            <tr><th>Estado</th><th>Descrição</th><th>Ações disponíveis</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="st st-idle">IDLE</span></td>
+              <td>Tarefa criada, timer nunca iniciado</td>
+              <td>Iniciar</td>
+            </tr>
+            <tr>
+              <td><span class="st st-running">RUNNING</span></td>
+              <td>Timer rodando agora</td>
+              <td>Pausar, Parar</td>
+            </tr>
+            <tr>
+              <td><span class="st st-paused">PAUSED</span></td>
+              <td>Timer pausado, tempo acumulado preservado</td>
+              <td>Retomar (→RUNNING), Parar</td>
+            </tr>
+            <tr>
+              <td><span class="st st-done">DONE</span></td>
+              <td>Concluída, com <code>concluidoEm</code> registrado</td>
+              <td>Reativar (→IDLE)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Como o tempo é calculado</h2>
+
+      <p>O backend não usa uma flag de "duração acumulada" — ele armazena <strong>segmentos de tempo</strong> individuais:</p>
+
+      <pre>SegmentoTempo
+  inicio: Instant   ← quando o timer foi iniciado/retomado
+  fim:    Instant   ← quando foi pausado/parado (null = segmento aberto)</pre>
+
+      <p>O <code>tempoTotalSegundos</code> retornado pela API é a <strong>soma de todos os segmentos fechados</strong> (<code>fim != null</code>) da tarefa. Um segmento com <code>fim = null</code> significa que o timer está rodando agora.</p>
+
+      <p>O frontend recebe o <code>tempoTotalSegundos</code> do servidor e usa um <code>setInterval</code> local para incrementar o display a cada segundo quando o estado é <span class="st st-running">RUNNING</span> — sem polling ao servidor.</p>
+
+      <h2>Resumo diário (Analytics)</h2>
+
+      <p>Ao acessar a tela de Resumo, o frontend consulta <code>GET /api/analytics/daily?date=YYYY-MM-DD</code>. O backend:</p>
+
+      <ol class="main" style="list-style:decimal;padding-left:22px;margin-bottom:0">
+        <li>Busca todos os <code>SegmentoTempo</code> do usuário cujo <code>inicio</code> está dentro do dia solicitado (meia-noite a meia-noite no UTC-3)</li>
+        <li>Agrupa por workspace para calcular o tempo total em cada um</li>
+        <li>Identifica a tarefa com maior tempo acumulado</li>
+        <li>Monta a timeline em ordem cronológica de início</li>
+      </ol>
+
+      <p style="margin-top:12px">O frontend exibe: <strong>total do dia</strong> em HH:MM:SS, <strong>barras horizontais</strong> por workspace (proporcionais ao tempo), <strong>tarefa mais longa</strong> com destaque e <strong>timeline</strong> cronológica com cor do workspace.</p>
+
+      <h2>Notificações push</h2>
+
+      <p>O Feitu suporta Web Push Notifications via VAPID. O fluxo completo:</p>
+
+      <ol class="steps">
+        <li>Usuário abre o app → browser pede permissão de notificação</li>
+        <li>Se aceito → frontend gera uma <code>PushSubscription</code> via Service Worker</li>
+        <li>Frontend envia endpoint + chaves (<code>p256dh</code>, <code>auth</code>) para <code>POST /api/push/subscribe</code></li>
+        <li>Backend persiste em <code>PushSubscription</code> associado ao usuário</li>
+        <li>Todo minuto, o scheduler verifica se algum usuário tem <code>horario_notificacao == agora</code></li>
+        <li>Se sim, e se ainda não enviou hoje → envia a notificação push</li>
+        <li>A notificação aparece mesmo com o app fechado</li>
+      </ol>
+
+      <div class="callout callout-blue">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><p>O horário padrão é <strong>22:00</strong> e pode ser alterado em configurações via <code>PUT /api/usuarios/me/notificacao</code>. Se as chaves VAPID não estiverem configuradas no servidor, o push é desabilitado silenciosamente — o resto do app funciona normalmente.</p></div>
+      </div>
+
+      <h2>PWA (Progressive Web App)</h2>
+
+      <p>O frontend é configurado como PWA via <code>vite-plugin-pwa</code>. Isso permite:</p>
+
+      <ul>
+        <li><strong>Instalar</strong> o app no celular/desktop como se fosse nativo (ícone na tela inicial)</li>
+        <li><strong>Funcionar offline</strong> para visualização — as páginas já visitadas ficam em cache via Service Worker</li>
+        <li><strong>Receber notificações push</strong> mesmo com o app fechado, via Service Worker</li>
+      </ul>
+
+      <p>O Service Worker usa a estratégia <code>NetworkFirst</code> para todas as chamadas <code>/api/</code> — tenta o servidor primeiro, cai para o cache se offline.</p>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>
