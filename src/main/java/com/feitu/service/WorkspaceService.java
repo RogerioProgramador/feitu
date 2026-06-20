@@ -1,0 +1,75 @@
+package com.feitu.service;
+
+import com.feitu.config.ResourceNotFoundException;
+import com.feitu.domain.Usuario;
+import com.feitu.domain.Workspace;
+import com.feitu.dto.WorkspaceRequest;
+import com.feitu.repository.UsuarioRepository;
+import com.feitu.repository.WorkspaceRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class WorkspaceService {
+
+    private final WorkspaceRepository workspaceRepository;
+    private final UsuarioRepository usuarioRepository;
+
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UsuarioRepository usuarioRepository) {
+        this.workspaceRepository = workspaceRepository;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Workspace> listar(UUID usuarioId) {
+        return workspaceRepository.findByUsuarioIdOrderByOrdem(usuarioId);
+    }
+
+    public Workspace criar(UUID usuarioId, WorkspaceRequest req) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+        int proximaOrdem = workspaceRepository.countByUsuarioId(usuarioId) + 1;
+
+        Workspace ws = new Workspace();
+        ws.setNome(req.nome());
+        ws.setCor(req.cor());
+        ws.setOrdem(proximaOrdem);
+        ws.setUsuario(usuario);
+        return workspaceRepository.save(ws);
+    }
+
+    public Workspace atualizar(UUID id, UUID usuarioId, WorkspaceRequest req) {
+        Workspace ws = buscarDoUsuario(id, usuarioId);
+        ws.setNome(req.nome());
+        ws.setCor(req.cor());
+        return workspaceRepository.save(ws);
+    }
+
+    public void reordenar(UUID usuarioId, List<UUID> novaOrdem) {
+        List<Workspace> workspaces = workspaceRepository.findByUsuarioIdOrderByOrdem(usuarioId);
+        for (int i = 0; i < novaOrdem.size(); i++) {
+            UUID id = novaOrdem.get(i);
+            workspaces.stream()
+                    .filter(ws -> ws.getId().equals(id))
+                    .findFirst()
+                    .ifPresent(ws -> ws.setOrdem(novaOrdem.indexOf(id) + 1));
+        }
+        workspaceRepository.saveAll(workspaces);
+    }
+
+    public void deletar(UUID id, UUID usuarioId) {
+        Workspace ws = buscarDoUsuario(id, usuarioId);
+        workspaceRepository.delete(ws);
+    }
+
+    private Workspace buscarDoUsuario(UUID id, UUID usuarioId) {
+        return workspaceRepository.findByIdAndUsuarioId(id, usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado"));
+    }
+}

@@ -1,0 +1,231 @@
+Perfeito! Vamos consolidar tudo com o Fly.io como plataforma de deploy, mantendo **todas** as características originais, os testes, a esteira CI/CD e a meta de custo zero para a PoC.
+
+---
+
+## 📋 Visão geral do produto (refinada)
+
+**Nome sugestivo:** *Feitu*.  
+**Conceito:** Um checklist diário com cronômetro embutido, dividido em abas (workspaces), focado em registrar *o que você fez* e *por quanto tempo*, com uma revisão noturna que convida à reflexão.  
+**Público:** Inicialmente só você (single‑user), mas arquitetura pronta para multi‑usuário no futuro.
+
+---
+
+## ⚙️ Funcionalidades detalhadas (todas mantidas + refinamentos)
+
+### 1. Abas (Workspaces)
+- Criação ilimitada de abas (ex.: “Trabalho”, “Vida Pessoal”).
+- Cada aba é um universo independente: lista de tarefas, tempos e seção de concluídos.
+- Pode usar uma única aba se preferir – o app não força separação.
+
+### 2. Tarefas com registro de tempo
+**Criação rápida:**
+- Botão “+” que cria uma tarefa com nome padrão “Outros” e já dispara o cronômetro.
+- A qualquer momento você pode renomear a tarefa (toque no nome).
+
+**Controle de tempo:**
+- Cada tarefa pode ter **vários segmentos de tempo** (início/fim).
+- Estados possíveis:
+  - `ociosa` (cronômetro parado)
+  - `em andamento` (cronômetro rodando)
+  - `pausada` (opcional, para interrupções)
+  - `concluída` (check de satisfação)
+- Ao iniciar, a tarefa fica `em andamento`. Você pode pausar/retomar ou pará‑la definitivamente.
+- Quando você para o cronômetro sem concluir, a tarefa permanece ativa e o tempo acumulado fica visível. Pode ser reiniciada depois, gerando novo segmento.
+
+**Conclusão com check satisfatório:**
+- Ao marcar como concluída (ícone de estrela ou círculo preenchido), o cronômetro para automaticamente e a tarefa **desce para a seção “Concluídos”**.
+- O check tem uma animação sutil (mudança de cor ou confete discreto) para dar sensação de dever cumprido.
+
+**Edição a posteriori:**
+- Tarefa concluída pode ter nome e tempos editados manualmente (caso esqueça de parar o cronômetro).
+
+### 3. Seção de “Concluídos”
+- Aparece abaixo das tarefas ativas, dentro da mesma aba.
+- Mostra nome, tempo total gasto e data/hora da conclusão.
+- É possível “reativar” um item, que volta à lista ativa.
+
+### 4. Analytics (visão do dia)
+- Tela exclusiva com resumo do dia atual:
+  - Total de horas/minutos dedicados.
+  - Gráfico de pizza ou barras simples com distribuição por aba.
+  - Linha do tempo cronológica das tarefas realizadas.
+  - Destaque para a tarefa que tomou mais tempo.
+- Permite navegar para dias anteriores via calendário resumido.
+
+### 5. Notificação de revisão diária
+- O usuário define o horário (padrão 22:00).
+- Nesse horário, uma notificação push é enviada:  
+  *“Que tal revisar seu dia? Veja o que você fez hoje.”*
+- Ao tocar na notificação, o app abre direto nos analytics.
+
+---
+
+## 🗃️ Modelo de dados (entidades principais)
+
+| Entidade | Atributos principais | Relacionamentos |
+|----------|----------------------|-----------------|
+| **Usuario** | id, email, senha (hash), horaRevisao | 1 → N Workspace |
+| **Workspace** | id, nome, cor (opcional) | N → 1 Usuario<br>1 → N Tarefa |
+| **Tarefa** | id, nome, concluída (boolean), dataConclusao | N → 1 Workspace<br>1 → N SegmentoTempo |
+| **SegmentoTempo** | id, inicio (timestamp), fim (nullable), duracao calculada | N → 1 Tarefa |
+| **PushSubscription** | id, endpoint, p256dh, auth | N → 1 Usuario |
+
+**Lógicas importantes:**
+- Duração total de uma tarefa = soma das durações dos segmentos com fim definido + tempo decorrido do segmento ativo (se houver).
+- A aba “Concluídos” é um filtro `WHERE concluída = true` ordenado por data.
+
+---
+
+## 🏗️ Arquitetura técnica (back + front + PWA)
+
+### Backend – Java 21 + Maven + Spring Boot 3.3+
+- **API REST** com Spring Web, Spring Data JPA, Spring Security (JWT).
+- **Banco de dados:** H2 em modo arquivo (para deploy simples, sem servidor externo). Em desenvolvimento, perfil `dev` com H2 em memória; em produção, arquivo persistente no volume do Fly.io.
+- **Notificações push:** biblioteca `nl.martijndwars:web-push`, job agendado (`@Scheduled`) que verifica minuto a minuto e envia push para as subscriptions ativas no horário definido.
+- **Geração de chaves VAPID:** uma vez e armazenadas em `application.properties` (ou variáveis de ambiente).
+
+Principais endpoints:
+- `POST /api/auth/registrar`, `POST /api/auth/login`
+- `GET/POST /api/workspaces`
+- `GET /api/workspaces/{id}/tarefas?concluidas=false`
+- `POST /api/tarefas` (já pode criar com nome “Outros” e status `em andamento`)
+- `PATCH /api/tarefas/{id}` (renomear, concluir, ajustar tempos)
+- `POST /api/tarefas/{id}/segmentos/iniciar`, `/pausar`, `/parar`
+- `GET /api/analytics/dia?data=2026-06-20`
+- `POST /api/push/subscribe`
+
+### Frontend – Vue 3 + Vite + Tailwind CSS + PWA
+- **Por que Vue?** Leve, reativo, fácil de criar componentes com visual minimalista e animações suaves. Tailwind acelera a estilização com tons pastel.
+- **PWA pronto:** plugin `vite-plugin-pwa` gera service worker, manifesto e estratégia de cache (Workbox).
+- **Service worker:** escuta eventos `push` e exibe a notificação, mesmo com o app fechado.
+- **Offline first:** o app funciona offline para visualização e até para iniciar/pausar tarefas (com sincronização posterior, caso deseje).
+
+**Paleta pastel sugerida:**
+- Fundo: `#F9F6F0` (bege bem claro)
+- Cartões: branco com sombra leve
+- Destaques: azul pastel `#A7C7E7`, verde água `#B5EAD7`, pêssego `#FFDAC1`, lavanda `#E2C6FF`
+- Texto: cinza escuro `#2D3748`
+- Ações: versão mais escura do tom pastel escolhido
+
+**Componentes principais:**
+- `TabBar`, `TaskList`, `TaskItem` (com cronômetro inline), `CompletedSection`, `AnalyticsView`, `DailyReviewPrompt`.
+
+### Empacotamento
+Um único artefato: o backend Spring Boot servirá os arquivos estáticos do frontend (pasta `dist/`) como recursos estáticos. Assim, um único contêiner resolve tudo.
+
+---
+
+## 🧪 Suite de testes (unitários + automatizados)
+
+### Backend (JUnit 5 + Mockito + Spring Boot Test)
+- **Testes unitários:** cobrem serviços, validações, regras de transição de estado, cálculos de duração.
+- **Testes de integração:** cobrem controllers com `MockMvc` ou `@SpringBootTest`, incluindo segurança JWT e serialização JSON. Banco H2 em perfil `test`.
+- **Organização:** espelhe os pacotes em `src/test/java`.
+- **Ferramentas complementares:** AssertJ (asserts fluentes), JaCoCo (cobertura informativa).
+
+### Frontend (Vitest + Vue Test Utils)
+- **Testes unitários de componentes:** garantem renderização, eventos (play, pause, check), v-model, etc.
+- **Mocks de API:** com `vi.mock` ou `msw` para simular chamadas ao backend.
+- **Testes e2e (opcional):** Cypress ou Playwright, para fluxos críticos. Pode ser adicionado após o MVP.
+
+**Estratégia:**  
+- Todo PR para `develop` deve passar pelos testes unitários e de integração.
+- Novas features devem incluir testes correspondentes. Isso garante que nada quebre sem querer.
+
+---
+
+## 🔁 Esteira CI/CD com GitHub Actions
+
+Fluxo de branches: `feature/*` → `develop` → `main`
+
+### Workflow (`.github/workflows/ci.yml`)
+
+**Triggers:**
+- Push em `feature/*`: roda testes de backend e frontend (sem deploy).
+- Pull Request para `develop`: mesma bateria de testes. O merge só é permitido se todos passarem.
+- Push em `develop`: testes + build do artefato (Docker image) e deploy opcional em ambiente de homologação.
+- Push em `main`: build final e deploy automático no Fly.io (produção).
+
+**Jobs:**
+
+1. **Backend:**
+   - Checkout → Setup JDK 21 → Cache Maven → `mvn test` (unitários + integração) → `mvn package -DskipTests` (se testes OK).
+
+2. **Frontend:**
+   - Checkout → Setup Node → Cache npm → `npm ci` → `npm run test:unit` → `npm run build` (gera `dist/`).
+
+3. **Deploy (apenas na main):**
+   - Utiliza a action `flyctl-actions` para subir o Dockerfile (que empacota o JAR com o front) ou diretamente o JAR com a CLI do Fly.io.
+
+**Exemplo simplificado do job de backend:**
+```yaml
+backend-tests:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - name: Cache Maven
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+    - name: Run tests
+      run: mvn test
+    - name: Build
+      run: mvn package -DskipTests
+```
+
+**Proteção de branches:** Exigir que o PR para `develop` passe nos checks e tenha revisão (mesmo que seja você mesmo).
+
+---
+
+## 🚀 Deploy no Fly.io (custo zero)
+
+### Por que Fly.io?
+- Plano gratuito generoso: 3 VMs compartilhadas de 256 MB, 3 GB de volume persistente, 100 GB de saída.
+- Para uma aplicação pessoal com pouco tráfego, é mais que suficiente.
+- Domínio `*.fly.dev` com HTTPS automático.
+- Deploy via CLI simples.
+
+### Passos práticos:
+
+1. **Criar conta no Fly.io** e instalar a CLI (`flyctl`).
+2. **No diretório do projeto**, execute `fly launch` e siga as instruções (ele detectará o Dockerfile). Escolha região mais próxima e não crie banco gerenciado – usaremos H2 em arquivo.
+3. **Configure o volume persistente** para o banco H2:  
+   `fly volumes create dados_h2 --size 1`  
+   Monte-o no `fly.toml` no path onde o Spring Boot salva o arquivo (ex.: `/data`).
+4. **Ajuste a memória da VM** para 256 MB (padrão). No `fly.toml`, certifique-se de que `[processes]` tem `memory = 256`.
+5. **Variáveis de ambiente:** defina `SPRING_PROFILES_ACTIVE=prod` e as chaves VAPID, JWT secret, etc., usando `fly secrets set`.
+6. **Deploy:** `fly deploy`. O Fly.io construirá a imagem e a subirá.
+
+### Otimização para caber em 256 MB:
+- Configure a JVM com `-Xmx128m -Xms64m` nas variáveis de ambiente (`JAVA_TOOL_OPTIONS`).
+- No Spring Boot, limite threads do Tomcat: `server.tomcat.max-threads=5`.
+- Desabilite cache de segundo nível do Hibernate: `spring.jpa.properties.hibernate.cache.use_second_level_cache=false`.
+- Use CDS (Class Data Sharing) para reduzir footprint de memória (opcional, mas desejável).
+
+Tudo isso garante que o app rode suavemente sem estourar a memória.
+
+### Endereço final:
+Seu app estará disponível em `https://<nome-do-app>.fly.dev`. Você pode instalar o PWA no celular e usar normalmente.
+
+---
+
+## 🎯 Plano de ação resumido (MVP completo)
+
+1. **Backend:** Spring Boot 3.3, Java 21, H2, endpoints REST, push scheduler.
+2. **Frontend:** Vue 3 + Vite + Tailwind, PWA, notificações.
+3. **Testes:**
+   - Backend: unitários (JUnit+Mockito) e de integração (SpringBootTest).
+   - Frontend: unitários (Vitest + Vue Test Utils).
+4. **CI/CD:** GitHub Actions com pipeline `feature → develop → main`, testes automáticos obrigatórios.
+5. **Empacotamento:** Dockerfile multi-stage que gera o front e copia para dentro do JAR.
+6. **Deploy:** Fly.io (gratuito), volume persistente para H2, domínio automático.
+7. **Monitoramento:** logs via `fly logs` e health checks básicos.
+
+
+Repo: git@github.com:RogerioProgramador/feitu.git
+
