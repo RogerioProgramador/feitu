@@ -15,22 +15,24 @@ const abrirRecentes = ref(false)
 const abrirHistorico = ref(false)
 const confirmandoDeleteId = ref<string | null>(null)
 
-const limite24h = Date.now() - 24 * 60 * 60 * 1000
-
 function utcMs(iso: string) {
   return new Date(iso.endsWith('Z') ? iso : iso + 'Z').getTime()
 }
 
+function diaCalendario(iso: string): string {
+  return new Date(utcMs(iso)).toLocaleDateString('pt-BR', { timeZone: tz.value })
+}
+
+function isHoje(iso: string): boolean {
+  return diaCalendario(iso) === new Date().toLocaleDateString('pt-BR', { timeZone: tz.value })
+}
+
 const concluidas = computed(() => props.tarefas.filter((t) => t.estado === 'DONE'))
 const recentes = computed(() =>
-  concluidas.value.filter(
-    (t) => !t.concluidoEm || utcMs(t.concluidoEm) > limite24h,
-  ),
+  concluidas.value.filter((t) => !t.concluidoEm || isHoje(t.concluidoEm)),
 )
 const historico = computed(() =>
-  concluidas.value.filter(
-    (t) => t.concluidoEm && utcMs(t.concluidoEm) <= limite24h,
-  ),
+  concluidas.value.filter((t) => t.concluidoEm && !isHoje(t.concluidoEm)),
 )
 
 function hora(t: Tarefa) {
