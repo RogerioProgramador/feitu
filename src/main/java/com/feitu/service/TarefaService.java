@@ -97,6 +97,7 @@ public class TarefaService {
 
     public void deletar(UUID id, UUID usuarioId) {
         Tarefa t = buscarDoUsuario(id, usuarioId);
+        segmentoTempoService.deletarPorTarefa(id);
         tarefaRepository.delete(t);
     }
 

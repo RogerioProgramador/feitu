@@ -36,6 +36,10 @@ public class SegmentoTempoService {
         return segmentoRepository.save(s);
     }
 
+    public void deletarPorTarefa(UUID tarefaId) {
+        segmentoRepository.deleteByTarefaId(tarefaId);
+    }
+
     @Transactional(readOnly = true)
     public long calcularTempoTotalSegundos(UUID tarefaId) {
         List<SegmentoTempo> segmentos = segmentoRepository.findByTarefaId(tarefaId);
