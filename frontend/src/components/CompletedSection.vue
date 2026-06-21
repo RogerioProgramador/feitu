@@ -13,27 +13,33 @@ const confirmandoDeleteId = ref<string | null>(null)
 
 const limite24h = Date.now() - 24 * 60 * 60 * 1000
 
+function utcMs(iso: string) {
+  return new Date(iso.endsWith('Z') ? iso : iso + 'Z').getTime()
+}
+
 const concluidas = computed(() => props.tarefas.filter((t) => t.estado === 'DONE'))
 const recentes = computed(() =>
   concluidas.value.filter(
-    (t) => !t.concluidoEm || new Date(t.concluidoEm).getTime() > limite24h,
+    (t) => !t.concluidoEm || utcMs(t.concluidoEm) > limite24h,
   ),
 )
 const historico = computed(() =>
   concluidas.value.filter(
-    (t) => t.concluidoEm && new Date(t.concluidoEm).getTime() <= limite24h,
+    (t) => t.concluidoEm && utcMs(t.concluidoEm) <= limite24h,
   ),
 )
 
 function hora(t: Tarefa) {
   if (!t.concluidoEm) return ''
-  return new Date(t.concluidoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(utcMs(t.concluidoEm)).toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
+  })
 }
 
 function dataHora(t: Tarefa) {
   if (!t.concluidoEm) return ''
-  return new Date(t.concluidoEm).toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  return new Date(utcMs(t.concluidoEm)).toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
   })
 }
 

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,14 +22,17 @@ public class AnalyticsService {
     }
 
     public DailySummaryResponse sumarioDiario(UUID usuarioId, LocalDate data) {
-        Instant de = data.atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant ate = data.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        ZoneId zone = ZoneId.of("America/Sao_Paulo");
+        Instant de = data.atStartOfDay(zone).toInstant();
+        Instant ate = data.plusDays(1).atStartOfDay(zone).toInstant();
 
         List<SegmentoTempo> segmentos = segmentoRepository
                 .findByUsuarioIdAndInicioBetween(usuarioId, de, ate)
                 .stream()
                 .filter(s -> s.getFim() != null)
-                .distinct()
+                .collect(java.util.stream.Collectors.toMap(
+                        s -> s.getId(), s -> s, (a, b) -> a, java.util.LinkedHashMap::new))
+                .values().stream()
                 .toList();
 
         long totalSegundos = segmentos.stream()

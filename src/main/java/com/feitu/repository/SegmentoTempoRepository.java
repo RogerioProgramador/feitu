@@ -15,7 +15,7 @@ public interface SegmentoTempoRepository extends JpaRepository<SegmentoTempo, UU
 
     Optional<SegmentoTempo> findByTarefaIdAndFimIsNull(UUID tarefaId);
 
-    @Query("SELECT s FROM SegmentoTempo s WHERE s.tarefa.workspace.usuario.id = :usuarioId AND s.inicio >= :de AND s.inicio < :ate")
+    @Query("SELECT DISTINCT s FROM SegmentoTempo s WHERE s.tarefa.workspace.usuario.id = :usuarioId AND s.inicio >= :de AND s.inicio < :ate")
     List<SegmentoTempo> findByUsuarioIdAndInicioBetween(UUID usuarioId, Instant de, Instant ate);
 
     void deleteByTarefaId(UUID tarefaId);

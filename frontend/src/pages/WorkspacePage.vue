@@ -18,7 +18,16 @@ onMounted(() => wsStore.carregar())
 <template>
   <div class="min-h-screen bg-feitu-bg dark:bg-night-bg flex flex-col max-w-lg mx-auto">
     <header class="flex items-center justify-between px-4 pt-4 pb-2">
-      <img src="/favicon.svg" alt="Feitu" class="h-8 w-8" />
+      <div class="flex items-center gap-2">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="30" height="30" rx="9" fill="#A7C7E7"/>
+          <path d="M8 8L8 22" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M8 8L18 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M8 15L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M15 13.5L18 17.5L24 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="font-display italic font-semibold text-xl text-feitu-text dark:text-night-text tracking-tight leading-none select-none">Feitu</span>
+      </div>
 
       <div class="flex items-center gap-2">
         <RouterLink
