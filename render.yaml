@@ -2,13 +2,19 @@ services:
   - type: web
     name: feitu
     runtime: docker
-    plan: free
+    plan: starter
     region: ohio
     dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
+    disk:
+      name: feitu-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: DB_PATH
+        value: /data/feitu
       - key: H2_CONSOLE_ENABLED
         value: "false"
       - key: JWT_SECRET
@@ -16,10 +22,4 @@ services:
       - key: VAPID_PUBLIC_KEY
         sync: false
       - key: VAPID_PRIVATE_KEY
-        sync: false
-      - key: SPRING_DATASOURCE_URL
-        sync: false
-      - key: SPRING_DATASOURCE_USERNAME
-        sync: false
-      - key: SPRING_DATASOURCE_PASSWORD
         sync: false
