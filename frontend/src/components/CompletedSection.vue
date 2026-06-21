@@ -50,7 +50,7 @@ async function deletar(id: string) {
     <div v-if="recentes.length">
       <button
         @click="abrirRecentes = !abrirRecentes"
-        class="w-full flex items-center gap-2 text-sm text-feitu-text/50 hover:text-feitu-text transition px-1 py-1.5"
+        class="w-full flex items-center gap-2 text-sm text-feitu-text/50 dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text transition px-1 py-1.5"
       >
         <span class="text-xs w-3">{{ abrirRecentes ? '▾' : '▸' }}</span>
         <span>Concluídas ({{ recentes.length }})</span>
@@ -60,13 +60,13 @@ async function deletar(id: string) {
         <div
           v-for="t in recentes"
           :key="t.id"
-          class="flex items-center gap-2 px-3 py-2.5 bg-feitu-teal/20 rounded-2xl"
+          class="flex items-center gap-2 px-3 py-2.5 bg-feitu-teal/20 dark:bg-feitu-teal/10 rounded-2xl"
         >
           <div class="flex-1 min-w-0">
-            <span class="text-sm text-feitu-text/55 line-through truncate block">{{ t.nome }}</span>
+            <span class="text-sm text-feitu-text/55 dark:text-night-text/55 line-through truncate block">{{ t.nome }}</span>
           </div>
-          <span class="font-mono text-xs text-feitu-text/40 tabular-nums flex-shrink-0">{{ formatarTempo(t.tempoTotalSegundos) }}</span>
-          <span class="text-xs text-feitu-text/30 flex-shrink-0 hidden sm:block">{{ hora(t) }}</span>
+          <span class="font-mono text-xs text-feitu-text/40 dark:text-night-text/40 tabular-nums flex-shrink-0">{{ formatarTempo(t.tempoTotalSegundos) }}</span>
+          <span class="text-xs text-feitu-text/30 dark:text-night-text/30 flex-shrink-0 hidden sm:block">{{ hora(t) }}</span>
 
           <template v-if="confirmandoDeleteId === t.id">
             <button
@@ -75,18 +75,18 @@ async function deletar(id: string) {
             >apagar</button>
             <button
               @click="confirmandoDeleteId = null"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg text-feitu-text/50 text-xs hover:bg-gray-100 transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/50 dark:text-night-text/50 text-xs hover:bg-gray-100 dark:hover:bg-night-bg/80 transition"
             >✗</button>
           </template>
           <template v-else>
             <button
               @click="store.reativar(workspaceId, t.id)"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white text-feitu-text/50 text-sm hover:shadow hover:text-feitu-text transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-night-surface text-feitu-text/50 dark:text-night-text/50 text-sm hover:shadow hover:text-feitu-text dark:hover:text-night-text transition"
               title="Reativar"
             >↺</button>
             <button
               @click="confirmandoDeleteId = t.id"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/20 text-sm hover:text-red-400 hover:bg-red-50 transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/20 dark:text-night-text/20 text-sm hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
               title="Deletar"
             >✕</button>
           </template>
@@ -98,7 +98,7 @@ async function deletar(id: string) {
     <div v-if="historico.length">
       <button
         @click="abrirHistorico = !abrirHistorico"
-        class="w-full flex items-center gap-2 text-sm text-feitu-text/35 hover:text-feitu-text transition px-1 py-1.5"
+        class="w-full flex items-center gap-2 text-sm text-feitu-text/35 dark:text-night-text/35 hover:text-feitu-text dark:hover:text-night-text transition px-1 py-1.5"
       >
         <span class="text-xs w-3">{{ abrirHistorico ? '▾' : '▸' }}</span>
         <span>Histórico ({{ historico.length }})</span>
@@ -108,13 +108,13 @@ async function deletar(id: string) {
         <div
           v-for="t in historico"
           :key="t.id"
-          class="flex items-center gap-2 px-3 py-2.5 bg-feitu-bg border border-feitu-text/8 rounded-2xl"
+          class="flex items-center gap-2 px-3 py-2.5 bg-feitu-bg dark:bg-night-bg border border-feitu-text/8 dark:border-night-text/10 rounded-2xl"
         >
           <div class="flex-1 min-w-0">
-            <span class="text-sm text-feitu-text/35 line-through truncate block">{{ t.nome }}</span>
+            <span class="text-sm text-feitu-text/35 dark:text-night-text/35 line-through truncate block">{{ t.nome }}</span>
           </div>
-          <span class="font-mono text-xs text-feitu-text/25 tabular-nums flex-shrink-0">{{ formatarTempo(t.tempoTotalSegundos) }}</span>
-          <span class="text-xs text-feitu-text/20 flex-shrink-0 hidden sm:block">{{ dataHora(t) }}</span>
+          <span class="font-mono text-xs text-feitu-text/25 dark:text-night-text/25 tabular-nums flex-shrink-0">{{ formatarTempo(t.tempoTotalSegundos) }}</span>
+          <span class="text-xs text-feitu-text/20 dark:text-night-text/20 flex-shrink-0 hidden sm:block">{{ dataHora(t) }}</span>
 
           <template v-if="confirmandoDeleteId === t.id">
             <button
@@ -123,18 +123,18 @@ async function deletar(id: string) {
             >apagar</button>
             <button
               @click="confirmandoDeleteId = null"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg text-feitu-text/50 text-xs hover:bg-gray-100 transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/50 dark:text-night-text/50 text-xs hover:bg-gray-100 dark:hover:bg-night-bg/80 transition"
             >✗</button>
           </template>
           <template v-else>
             <button
               @click="store.reativar(workspaceId, t.id)"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white text-feitu-text/35 text-sm hover:shadow hover:text-feitu-text transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-night-surface text-feitu-text/35 dark:text-night-text/35 text-sm hover:shadow hover:text-feitu-text dark:hover:text-night-text transition"
               title="Reativar"
             >↺</button>
             <button
               @click="confirmandoDeleteId = t.id"
-              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/15 text-sm hover:text-red-400 hover:bg-red-50 transition"
+              class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/15 dark:text-night-text/15 text-sm hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
               title="Deletar"
             >✕</button>
           </template>

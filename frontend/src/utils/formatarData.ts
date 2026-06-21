@@ -4,5 +4,7 @@ export function formatarDataBR(isoDate: string): string {
 }
 
 export function hojeISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  const fuso = localStorage.getItem('feitu_fuso') ?? 'BR'
+  const tz = fuso === 'BR' ? 'America/Sao_Paulo' : 'UTC'
+  return new Date().toLocaleDateString('sv-SE', { timeZone: tz })
 }

@@ -35,7 +35,7 @@ async function novaTarefa() {
 
     <button
       @click="novaTarefa"
-      class="flex items-center gap-2 px-4 py-3 text-feitu-text/50 hover:text-feitu-text text-sm rounded-2xl hover:bg-white/60 transition text-left"
+      class="flex items-center gap-2 px-4 py-3 text-feitu-text/50 dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text text-sm rounded-2xl hover:bg-white/60 dark:hover:bg-night-surface/60 transition text-left"
     >
       <span class="text-lg leading-none">+</span>
       <span>Nova tarefa</span>

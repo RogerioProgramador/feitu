@@ -48,13 +48,13 @@ const classBotaoPrincipal = computed(() => {
   if (props.tarefa.estado === 'RUNNING')
     return 'bg-feitu-peach text-feitu-text shadow-sm'
   if (props.tarefa.estado === 'PAUSED')
-    return 'bg-feitu-blue/50 text-feitu-text'
-  return 'bg-feitu-bg border border-feitu-text/10 text-feitu-text/35 hover:border-feitu-teal hover:text-feitu-text/70'
+    return 'bg-feitu-blue/50 text-feitu-text dark:text-night-text'
+  return 'bg-feitu-bg dark:bg-night-bg border border-feitu-text/10 dark:border-night-text/10 text-feitu-text/35 dark:text-night-text/35 hover:border-feitu-teal hover:text-feitu-text/70 dark:hover:text-night-text/70'
 })
 </script>
 
 <template>
-  <div class="flex items-center gap-2.5 px-3 py-2.5 bg-white rounded-2xl shadow-sm">
+  <div class="flex items-center gap-2.5 px-3 py-2.5 bg-white dark:bg-night-surface rounded-2xl shadow-sm">
     <!-- Botão de ação primário (esquerda) -->
     <button
       @click="acao(acaoPrincipal)"
@@ -72,20 +72,20 @@ const classBotaoPrincipal = computed(() => {
         @blur="salvarNome"
         @keydown.enter="salvarNome"
         @keydown.esc="editando = false"
-        class="w-full text-sm text-feitu-text outline-none border-b border-feitu-blue bg-transparent"
+        class="w-full text-sm text-feitu-text dark:text-night-text outline-none border-b border-feitu-blue bg-transparent"
         v-focus
       />
       <span
         v-else
         @click="editando = true"
-        class="text-sm text-feitu-text truncate block cursor-text select-none"
+        class="text-sm text-feitu-text dark:text-night-text truncate block cursor-text select-none"
       >{{ tarefa.nome }}</span>
     </div>
 
     <!-- Timer -->
     <span
       class="font-mono text-sm tabular-nums flex-shrink-0 min-w-[3rem] text-right"
-      :class="tarefa.estado === 'RUNNING' ? 'text-feitu-text' : 'text-feitu-text/35'"
+      :class="tarefa.estado === 'RUNNING' ? 'text-feitu-text dark:text-night-text' : 'text-feitu-text/35 dark:text-night-text/35'"
     >{{ formatarTempo(segundos) }}</span>
 
     <!-- Estado: confirmação de delete -->
@@ -97,7 +97,7 @@ const classBotaoPrincipal = computed(() => {
       >apagar</button>
       <button
         @click="confirmandoDelete = false"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg text-feitu-text/50 text-xs hover:bg-gray-100 transition"
+        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/50 dark:text-night-text/50 text-xs hover:bg-gray-100 dark:hover:bg-night-bg/80 transition"
       >✗</button>
     </template>
 
@@ -107,13 +107,13 @@ const classBotaoPrincipal = computed(() => {
         v-if="tarefa.estado === 'RUNNING' || tarefa.estado === 'PAUSED'"
         @click="acao(() => store.pararTimer(workspaceId, tarefa.id))"
         :disabled="carregando"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg text-feitu-text/40 text-sm hover:bg-red-50 hover:text-red-400 transition disabled:opacity-40"
+        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/40 dark:text-night-text/40 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-400 transition disabled:opacity-40"
         title="Concluir"
       >⏹</button>
       <button
         @click="confirmandoDelete = true"
         :disabled="carregando"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/20 text-sm hover:text-red-400 hover:bg-red-50 transition disabled:opacity-40"
+        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/20 dark:text-night-text/20 text-sm hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-40"
         title="Deletar"
       >✕</button>
     </template>

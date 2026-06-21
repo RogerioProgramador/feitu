@@ -8,6 +8,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  .dark body {
+    @apply bg-night-bg text-night-text;
+  }
+
   * {
     box-sizing: border-box;
   }
