@@ -36,8 +36,8 @@ function cancelarNovo() {
       class="flex-shrink-0 px-4 py-2 rounded-t-xl text-sm font-medium transition-all"
       :class="
         store.ativoId === ws.id
-          ? 'text-feitu-text border-b-2 border-feitu-text bg-white shadow-sm'
-          : 'text-feitu-text/60 hover:text-feitu-text'
+          ? 'text-feitu-text dark:text-night-text border-b-2 border-feitu-text bg-white dark:bg-night-surface shadow-sm'
+          : 'text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text'
       "
       :style="store.ativoId === ws.id ? { borderBottomColor: ws.cor ?? '#A7C7E7' } : {}"
     >
@@ -52,14 +52,14 @@ function cancelarNovo() {
         @keydown.esc="cancelarNovo"
         @blur="confirmarNovo"
         placeholder="Nome..."
-        class="flex-shrink-0 px-3 py-1.5 text-sm border border-feitu-blue rounded-xl outline-none w-28"
+        class="flex-shrink-0 px-3 py-1.5 text-sm border border-feitu-blue rounded-xl outline-none w-28 bg-white dark:bg-night-surface text-feitu-text dark:text-night-text"
       />
     </template>
 
     <button
       v-else
       @click="criando = true"
-      class="flex-shrink-0 px-3 py-2 text-feitu-text/50 hover:text-feitu-text text-lg leading-none rounded-xl hover:bg-white transition"
+      class="flex-shrink-0 px-3 py-2 text-feitu-text/50 dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text text-lg leading-none rounded-xl hover:bg-white dark:hover:bg-night-surface transition"
       title="Novo workspace"
     >
       +

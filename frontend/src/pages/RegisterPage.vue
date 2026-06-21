@@ -35,39 +35,39 @@ async function criar() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-feitu-bg px-4">
-    <div class="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6">
-      <h1 class="text-2xl font-semibold text-feitu-text text-center">Criar conta</h1>
+  <div class="min-h-screen flex items-center justify-center bg-feitu-bg dark:bg-night-bg px-4">
+    <div class="w-full max-w-sm bg-white dark:bg-night-surface rounded-2xl shadow-sm p-8 space-y-6">
+      <h1 class="text-2xl font-semibold text-feitu-text dark:text-night-text text-center">Criar conta</h1>
 
       <form @submit.prevent="criar" class="space-y-4">
         <div>
-          <label class="block text-sm text-feitu-text mb-1">E-mail</label>
+          <label class="block text-sm text-feitu-text dark:text-night-text mb-1">E-mail</label>
           <input
             v-model="email"
             type="email"
             required
-            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm"
+            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm bg-white dark:bg-night-bg text-feitu-text dark:text-night-text"
           />
         </div>
 
         <div>
-          <label class="block text-sm text-feitu-text mb-1">Senha</label>
+          <label class="block text-sm text-feitu-text dark:text-night-text mb-1">Senha</label>
           <input
             v-model="senha"
             type="password"
             required
             minlength="8"
-            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm"
+            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm bg-white dark:bg-night-bg text-feitu-text dark:text-night-text"
           />
         </div>
 
         <div>
-          <label class="block text-sm text-feitu-text mb-1">Confirmar senha</label>
+          <label class="block text-sm text-feitu-text dark:text-night-text mb-1">Confirmar senha</label>
           <input
             v-model="confirmar"
             type="password"
             required
-            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm"
+            class="w-full border border-feitu-blue rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-feitu-blue text-sm bg-white dark:bg-night-bg text-feitu-text dark:text-night-text"
           />
         </div>
 
@@ -82,7 +82,7 @@ async function criar() {
         </button>
       </form>
 
-      <p class="text-sm text-center text-feitu-text">
+      <p class="text-sm text-center text-feitu-text dark:text-night-text">
         Já tem conta?
         <RouterLink to="/login" class="underline">Entrar</RouterLink>
       </p>
