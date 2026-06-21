@@ -21,9 +21,8 @@ public class AnalyticsService {
     }
 
     public DailySummaryResponse sumarioDiario(UUID usuarioId, LocalDate data) {
-        ZoneId zone = ZoneId.of("America/Sao_Paulo");
-        Instant de = data.atStartOfDay(zone).toInstant();
-        Instant ate = data.plusDays(1).atStartOfDay(zone).toInstant();
+        Instant de = data.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant ate = data.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<SegmentoTempo> segmentos = segmentoRepository
                 .findByUsuarioIdAndInicioBetween(usuarioId, de, ate)
