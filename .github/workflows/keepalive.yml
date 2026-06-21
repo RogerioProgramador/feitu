@@ -1,0 +1,14 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '*/14 11-23 * * *'  # UTC 11h-23h = Brasil 8h-20h58
+    - cron: '*/14 0-3 * * *'    # UTC 0h-3h   = Brasil 21h-meia-noite
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping feitu
+        run: curl -sf https://feitu.onrender.com/actuator/health || true
