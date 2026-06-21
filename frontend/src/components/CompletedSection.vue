@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTarefaStore } from '../stores/tarefaStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { formatarTempo } from '../utils/formatarTempo'
 import type { Tarefa } from '../types'
 
 const props = defineProps<{ workspaceId: string; tarefas: Tarefa[] }>()
 const store = useTarefaStore()
+const settings = useSettingsStore()
+
+const tz = computed(() => settings.fusoHorario === 'BR' ? 'America/Sao_Paulo' : 'UTC')
 
 const abrirRecentes = ref(false)
 const abrirHistorico = ref(false)
@@ -32,14 +36,14 @@ const historico = computed(() =>
 function hora(t: Tarefa) {
   if (!t.concluidoEm) return ''
   return new Date(utcMs(t.concluidoEm)).toLocaleTimeString('pt-BR', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
+    hour: '2-digit', minute: '2-digit', timeZone: tz.value,
   })
 }
 
 function dataHora(t: Tarefa) {
   if (!t.concluidoEm) return ''
   return new Date(utcMs(t.concluidoEm)).toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: tz.value,
   })
 }
 
