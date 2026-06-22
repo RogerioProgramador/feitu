@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Reference — Feitu Docs</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="layout">
@@ -12,7 +15,12 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <a href="index.html" class="logo-link">
-        <div class="logo-mark">✓</div>
+        <div class="logo-mark">
+          <svg width="22" height="22" viewBox="0 0 56 56" fill="none">
+            <circle cx="28" cy="28" r="18" stroke="#5E8BB6" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="87 26" fill="none" transform="rotate(-46 28 28)"/>
+            <path d="M19 28l6 6 12-12" stroke="#E07B4F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="logo-info">
           <span class="logo-name">Feitu</span>
           <span class="logo-sub">Documentação</span>
@@ -75,16 +83,18 @@
           <span class="ep-path">/api/auth/register</span>
         </div>
         <div class="ep-body">
-          <p>Cria uma nova conta.</p>
+          <p>Cria uma nova conta. Requer um código de convite válido.</p>
           <h4>Body</h4>
           <pre><code>{
   "email": "usuario@exemplo.com",
-  "senha": "minimo8chars"
+  "senha": "minimo8chars",
+  "codigoConvite": "FEITU-BETA1"
 }</code></pre>
           <h4>Resposta 201 Created</h4>
           <pre><code>{ "token": "eyJhbGci..." }</code></pre>
           <h4>Erros</h4>
           <div class="ep-errors"><span class="err">400</span><span class="err">422</span></div>
+          <p style="margin-top:8px">O erro 422 inclui "Código de convite inválido ou já utilizado" quando o código não existe ou já foi consumido.</p>
         </div>
       </div>
 
@@ -287,6 +297,22 @@
         <div class="ep-body">
           <p>Remove a tarefa e todos os seus segmentos de tempo.</p>
           <h4>Resposta 204 No Content</h4>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="ep-head">
+          <span class="method m-patch">PATCH</span>
+          <span class="ep-path">/api/tarefas/{id}/descricao</span>
+        </div>
+        <div class="ep-body">
+          <p>Atualiza a nota/descrição de uma tarefa.</p>
+          <h4>Body</h4>
+          <pre><code>{ "descricao": "texto da nota (máx 4000 chars, pode ser null)" }</code></pre>
+          <h4>Resposta 200 OK</h4>
+          <p>Objeto <code>TarefaResponse</code> com campo <code>descricao</code> preenchido.</p>
+          <h4>Erros</h4>
+          <div class="ep-errors"><span class="err">404</span></div>
         </div>
       </div>
 

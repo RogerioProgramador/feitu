@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Como funciona — Feitu Docs</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="layout">
@@ -12,7 +15,12 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <a href="index.html" class="logo-link">
-        <div class="logo-mark">✓</div>
+        <div class="logo-mark">
+          <svg width="22" height="22" viewBox="0 0 56 56" fill="none">
+            <circle cx="28" cy="28" r="18" stroke="#5E8BB6" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="87 26" fill="none" transform="rotate(-46 28 28)"/>
+            <path d="M19 28l6 6 12-12" stroke="#E07B4F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="logo-info">
           <span class="logo-name">Feitu</span>
           <span class="logo-sub">Documentação</span>
@@ -62,7 +70,7 @@
       <h2 class="first">Workspaces</h2>
 
       <p>Workspaces são abas de organização. Cada workspace tem um <strong>nome</strong> e uma <strong>cor</strong>, e contém suas próprias tarefas. Você pode ter quantos quiser — a sugestão é separar por contexto: Trabalho, Estudos, Projetos Pessoais.</p>
-      <p>A ordem dos workspaces pode ser reorganizada arrastando as abas. A nova ordem é persistida automaticamente no backend.</p>
+      <p>A ordem dos workspaces pode ser reorganizada arrastando as abas. A nova ordem é persistida automaticamente no backend. Workspaces podem ser deletados em <strong>Configurações</strong> (rota <code>/settings</code>).</p>
 
       <h2>Ciclo de vida do timer</h2>
 
@@ -163,6 +171,18 @@
       </ul>
 
       <p>O Service Worker usa a estratégia <code>NetworkFirst</code> para todas as chamadas <code>/api/</code> — tenta o servidor primeiro, cai para o cache se offline.</p>
+
+      <h2>Nota por tarefa</h2>
+
+      <p>Cada tarefa tem um campo de nota/descrição opcional. Para adicionar ou editar, toque no botão de nota (ícone de lápis) na barra de ações da tarefa. Um painel deslizante (bottom sheet) abre com uma área de texto. A nota é salva via <code>PATCH /api/tarefas/{id}/descricao</code> e persistida no banco. O botão fica com destaque em lavanda quando há conteúdo.</p>
+
+      <h2>Histórico</h2>
+
+      <p>Tarefas concluídas em dias anteriores ficam acessíveis através do botão <strong>Histórico</strong> na seção de concluídas. O Histórico é uma sub-tela dentro do workspace que agrupa as tarefas por data (Ontem, 15/06/2026, etc.), mostrando o total de tempo por dia e o horário de conclusão de cada tarefa. Tarefas do histórico também podem ser reativadas.</p>
+
+      <h2>Invite code</h2>
+
+      <p>O cadastro exige um <strong>código de convite</strong> válido (formato <code>FEITU-XXXX</code>). Os códigos são de uso único — cada código é consumido no momento do cadastro. Administradores inserem códigos diretamente via SQL no banco ou console H2.</p>
 
     </div>
   </main>
