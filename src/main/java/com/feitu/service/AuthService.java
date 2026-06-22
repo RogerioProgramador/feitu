@@ -1,10 +1,12 @@
 package com.feitu.service;
 
 import com.feitu.config.BusinessException;
+import com.feitu.domain.InviteCode;
 import com.feitu.domain.Usuario;
 import com.feitu.dto.AuthResponse;
 import com.feitu.dto.LoginRequest;
 import com.feitu.dto.RegisterRequest;
+import com.feitu.repository.InviteCodeRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,24 +24,35 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final InviteCodeRepository inviteCodeRepository;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AuthenticationManager authenticationManager,
-            UserDetailsService userDetailsService) {
+            UserDetailsService userDetailsService,
+            InviteCodeRepository inviteCodeRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
+        this.inviteCodeRepository = inviteCodeRepository;
     }
 
     public AuthResponse register(RegisterRequest req) {
+        InviteCode invite = inviteCodeRepository
+                .findByCodeIgnoreCaseAndAtivoTrue(req.codigoConvite())
+                .orElseThrow(() -> new BusinessException("Código de convite inválido ou já utilizado"));
+
         if (usuarioRepository.existsByEmail(req.email())) {
             throw new BusinessException("E-mail já cadastrado: " + req.email());
         }
+
+        invite.setAtivo(false);
+        inviteCodeRepository.save(invite);
+
         Usuario usuario = new Usuario();
         usuario.setEmail(req.email());
         usuario.setSenhaHash(passwordEncoder.encode(req.senha()));

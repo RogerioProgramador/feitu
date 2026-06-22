@@ -13,4 +13,6 @@ export const tarefaApi = {
   pararTimer: (id: string) => http.post<Tarefa>(`/tarefas/${id}/parar`).then((r) => r.data),
   reativar: (id: string) => http.post<Tarefa>(`/tarefas/${id}/reativar`).then((r) => r.data),
   deletar: (id: string) => http.delete(`/tarefas/${id}`),
+  atualizarDescricao: (id: string, descricao: string | null) =>
+    http.patch<Tarefa>(`/tarefas/${id}/descricao`, { descricao }).then((r) => r.data),
 }

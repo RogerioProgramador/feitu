@@ -1,6 +1,7 @@
 package com.feitu.controller;
 
 import com.feitu.dto.RenomearRequest;
+import com.feitu.dto.TarefaDescricaoRequest;
 import com.feitu.dto.TarefaRequest;
 import com.feitu.dto.TarefaResponse;
 import com.feitu.repository.UsuarioRepository;
@@ -49,6 +50,15 @@ public class TarefaController {
             @RequestBody TarefaRequest req) {
         var t = tarefaService.criar(workspaceId, usuarioId(principal), req);
         return TarefaResponse.from(t, 0L);
+    }
+
+    @PatchMapping("/api/tarefas/{id}/descricao")
+    public TarefaResponse atualizarDescricao(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestBody @Valid TarefaDescricaoRequest req) {
+        var t = tarefaService.atualizarDescricao(id, usuarioId(principal), req.descricao());
+        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
     }
 
     @PatchMapping("/api/tarefas/{id}/nome")

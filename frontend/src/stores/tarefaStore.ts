@@ -54,5 +54,10 @@ export const useTarefaStore = defineStore('tarefa', () => {
     tarefas.value[workspaceId] = (tarefas.value[workspaceId] ?? []).filter((t) => t.id !== id)
   }
 
-  return { tarefas, carregar, criar, renomear, iniciarTimer, pausarTimer, pararTimer, reativar, deletar }
+  async function atualizarDescricao(workspaceId: string, id: string, descricao: string | null) {
+    const t = await tarefaApi.atualizarDescricao(id, descricao)
+    atualizar(workspaceId, t)
+  }
+
+  return { tarefas, carregar, criar, renomear, iniciarTimer, pausarTimer, pararTimer, reativar, deletar, atualizarDescricao }
 })

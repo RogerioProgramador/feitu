@@ -14,6 +14,7 @@ export interface Tarefa {
   tempoTotalSegundos: number
   criadoEm: string
   concluidoEm: string | null
+  descricao?: string | null
 }
 
 export interface Usuario {

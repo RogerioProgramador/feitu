@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import TabBar from '../components/TabBar.vue'
 import TaskList from '../components/TaskList.vue'
-import SettingsModal from '../components/SettingsModal.vue'
+import HistoricoView from '../components/HistoricoView.vue'
 
 const wsStore = useWorkspaceStore()
-const showSettings = ref(false)
+const router = useRouter()
+const view = ref<'main' | 'history'>('main')
 
 const workspaceAtivo = computed(() =>
   wsStore.workspaces.find((w) => w.id === wsStore.ativoId) ?? null,
@@ -17,53 +19,78 @@ onMounted(() => wsStore.carregar())
 
 <template>
   <div class="min-h-screen bg-feitu-bg dark:bg-night-bg flex flex-col max-w-lg mx-auto">
-    <header class="flex items-center justify-between px-4 pt-4 pb-2">
-      <div class="flex items-center gap-2">
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect width="30" height="30" rx="9" fill="#A7C7E7"/>
-          <path d="M8 8L8 22" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M8 8L18 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M8 15L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M15 13.5L18 17.5L24 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="font-display italic font-semibold text-xl text-feitu-text dark:text-night-text tracking-tight leading-none select-none">Feitu</span>
+
+    <!-- Header -->
+    <header class="flex items-center justify-between px-4 pt-5 pb-3">
+      <div class="flex items-center gap-[10px]">
+        <!-- Arc+check logo -->
+        <div class="flex-shrink-0 w-[34px] h-[34px] rounded-[11px] bg-[#EAF1F8] flex items-center justify-center">
+          <svg width="28" height="28" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle
+              cx="28" cy="28" r="18"
+              stroke="#5E8BB6"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-dasharray="87 26"
+              fill="none"
+              transform="rotate(-46 28 28)"
+            />
+            <path d="M19 28l6 6 12-12" stroke="#E07B4F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-display italic text-[26px] text-feitu-text dark:text-night-text leading-none select-none">Feitu</span>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-[8px]">
+        <!-- Resumo (analytics) -->
         <RouterLink
           to="/analytics"
-          class="text-sm font-medium text-feitu-text/70 dark:text-night-text/70 hover:text-feitu-text dark:hover:text-night-text border border-feitu-text/20 dark:border-night-text/20 rounded-xl px-3 py-1.5 transition hover:border-feitu-text/40 dark:hover:border-night-text/40"
+          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] bg-white dark:bg-night-surface dark:border-[rgba(255,255,255,.06)] text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
+          title="Resumo"
         >
-          Resumo
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
         </RouterLink>
 
+        <!-- Settings -->
         <button
-          @click="showSettings = true"
-          class="h-9 w-9 flex items-center justify-center rounded-xl text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text hover:bg-white/60 dark:hover:bg-night-surface/60 transition"
+          @click="router.push('/settings')"
+          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] bg-white dark:bg-night-surface dark:border-[rgba(255,255,255,.06)] text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
           title="Configurações"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/>
+            <circle cx="20" cy="18" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="8" cy="6" r="2"/>
           </svg>
         </button>
       </div>
     </header>
 
-    <TabBar />
+    <!-- Main view -->
+    <template v-if="view === 'main'">
+      <TabBar />
 
-    <div
-      class="h-0.5 mx-4 rounded-full transition-colors"
-      :style="{ backgroundColor: workspaceAtivo?.cor ?? '#A7C7E7' }"
+      <div class="flex-1 overflow-y-auto">
+        <TaskList
+          v-if="wsStore.ativoId"
+          :workspace-id="wsStore.ativoId"
+          :workspace-cor="workspaceAtivo?.cor ?? '#A7C7E7'"
+          @abrir-historico="view = 'history'"
+        />
+        <div v-else class="p-8 text-center text-feitu-text/40 dark:text-night-text/40 text-sm">
+          Crie um workspace para começar
+        </div>
+      </div>
+    </template>
+
+    <!-- Histórico sub-view -->
+    <HistoricoView
+      v-else
+      :workspace-id="wsStore.ativoId ?? ''"
+      :workspace-cor="workspaceAtivo?.cor ?? '#A7C7E7'"
+      @voltar="view = 'main'"
     />
 
-    <div class="flex-1 overflow-y-auto">
-      <TaskList v-if="wsStore.ativoId" :workspace-id="wsStore.ativoId" />
-      <div v-else class="p-8 text-center text-feitu-text/40 dark:text-night-text/40 text-sm">
-        Crie um workspace para começar
-      </div>
-    </div>
-
-    <SettingsModal v-if="showSettings" @close="showSettings = false" />
   </div>
 </template>

@@ -15,7 +15,8 @@ const { segundos } = useTimer(
 const editando = ref(false)
 const nomeEdit = ref(props.tarefa.nome)
 const carregando = ref(false)
-const confirmandoDelete = ref(false)
+const noteOpen = ref(false)
+const noteText = ref(props.tarefa.descricao ?? '')
 
 async function acao(fn: () => Promise<unknown>) {
   if (carregando.value) return
@@ -30,92 +31,188 @@ async function salvarNome() {
   }
 }
 
+async function salvarNota() {
+  await store.atualizarDescricao(props.workspaceId, props.tarefa.id, noteText.value || null)
+  noteOpen.value = false
+}
+
 const acaoPrincipal = computed(() =>
   props.tarefa.estado === 'RUNNING'
     ? () => store.pausarTimer(props.workspaceId, props.tarefa.id)
     : () => store.iniciarTimer(props.workspaceId, props.tarefa.id),
 )
 
-const iconePrincipal = computed(() => (props.tarefa.estado === 'RUNNING' ? '⏸' : '▶'))
-
-const tituloPrincipal = computed(() => {
-  if (props.tarefa.estado === 'RUNNING') return 'Pausar'
-  if (props.tarefa.estado === 'PAUSED') return 'Retomar'
-  return 'Iniciar'
-})
-
-const classBotaoPrincipal = computed(() => {
+const cardClass = computed(() => {
   if (props.tarefa.estado === 'RUNNING')
-    return 'bg-feitu-peach text-feitu-text shadow-sm'
-  if (props.tarefa.estado === 'PAUSED')
-    return 'bg-feitu-blue/50 text-feitu-text dark:text-night-text'
-  return 'bg-feitu-bg dark:bg-night-bg border border-feitu-text/10 dark:border-night-text/10 text-feitu-text/35 dark:text-night-text/35 hover:border-feitu-teal hover:text-feitu-text/70 dark:hover:text-night-text/70'
+    return 'bg-gradient-to-b from-[#FFF4EC] to-[#FFEFE3] border-[1.5px] border-[rgba(224,123,79,.32)] dark:from-[#2A2015] dark:to-[#271D10] dark:border-[rgba(224,123,79,.2)]'
+  return 'bg-white dark:bg-night-card border border-[rgba(54,51,46,.07)] dark:border-[rgba(255,255,255,.06)] shadow-[0_1px_2px_rgba(58,55,51,.04)]'
 })
 </script>
 
 <template>
-  <div class="flex items-center gap-2.5 px-3 py-2.5 bg-white dark:bg-night-surface rounded-2xl shadow-sm">
-    <!-- Botão de ação primário (esquerda) -->
-    <button
-      @click="acao(acaoPrincipal)"
-      :disabled="carregando"
-      class="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-full text-sm transition-all disabled:opacity-40"
-      :class="classBotaoPrincipal"
-      :title="tituloPrincipal"
-    >{{ iconePrincipal }}</button>
+  <div class="rounded-[18px] overflow-hidden" :class="cardClass">
+    <div class="flex items-center gap-3 px-4 py-[14px]">
 
-    <!-- Nome editável -->
-    <div class="flex-1 min-w-0">
-      <input
-        v-if="editando"
-        v-model="nomeEdit"
-        @blur="salvarNome"
-        @keydown.enter="salvarNome"
-        @keydown.esc="editando = false"
-        class="w-full text-sm text-feitu-text dark:text-night-text outline-none border-b border-feitu-blue bg-transparent"
-        v-focus
-      />
+      <!-- Botão principal 56×56 -->
+      <div class="flex-shrink-0 relative">
+        <!-- Spinner arc (só RUNNING) -->
+        <svg
+          v-if="tarefa.estado === 'RUNNING'"
+          class="absolute -top-1 -left-1 pointer-events-none animate-feitu-spin"
+          width="64" height="64" viewBox="0 0 64 64"
+        >
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#E07B4F" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="42 128" opacity="0.55"/>
+        </svg>
+
+        <!-- Dashed arc (só PAUSED) -->
+        <svg
+          v-else-if="tarefa.estado === 'PAUSED'"
+          class="absolute -top-1 -left-1 pointer-events-none"
+          width="64" height="64" viewBox="0 0 64 64"
+        >
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#CF6A36" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="6 8" opacity="0.35"/>
+        </svg>
+
+        <button
+          @click="acao(acaoPrincipal)"
+          :disabled="carregando"
+          class="w-14 h-14 flex items-center justify-center rounded-full transition-all disabled:opacity-40"
+          :class="{
+            'bg-[#E07B4F] text-white shadow-[0_4px_14px_rgba(224,123,79,.4)]': tarefa.estado === 'RUNNING',
+            'bg-[#FFE3D1] text-[#CF6A36] dark:bg-[#3A2010] dark:text-[#F0935F]': tarefa.estado === 'PAUSED',
+            'bg-[#EFEAE0] text-[#5E8BB6] dark:bg-[#30303F] dark:text-[#93B7DB]': tarefa.estado === 'IDLE',
+          }"
+          :title="tarefa.estado === 'RUNNING' ? 'Pausar' : tarefa.estado === 'PAUSED' ? 'Retomar' : 'Iniciar'"
+        >
+          <!-- Pause icon (RUNNING) -->
+          <svg v-if="tarefa.estado === 'RUNNING'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+          <!-- Play icon (IDLE or PAUSED) -->
+          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Nome + status -->
+      <div class="flex-1 min-w-0">
+        <input
+          v-if="editando"
+          v-model="nomeEdit"
+          @blur="salvarNome"
+          @keydown.enter="salvarNome"
+          @keydown.esc="editando = false"
+          class="w-full text-[14.5px] font-medium text-feitu-text dark:text-night-text outline-none border-b border-feitu-blue bg-transparent"
+          v-focus
+        />
+        <span
+          v-else
+          @click="editando = true"
+          class="text-[14.5px] font-medium text-feitu-text dark:text-night-text truncate block cursor-text select-none leading-snug"
+        >{{ tarefa.nome }}</span>
+
+        <!-- Status label -->
+        <div class="flex items-center gap-[5px] mt-[3px]">
+          <span
+            v-if="tarefa.estado === 'RUNNING'"
+            class="w-[7px] h-[7px] rounded-full bg-[#E07B4F] animate-feitu-breathe flex-shrink-0"
+          />
+          <span
+            class="text-[11.5px]"
+            :class="{
+              'text-[#CF6A36]': tarefa.estado === 'RUNNING',
+              'text-[#A98A74]': tarefa.estado === 'PAUSED',
+              'text-[#A39C90]': tarefa.estado === 'IDLE',
+            }"
+          >
+            <template v-if="tarefa.estado === 'RUNNING'">Em andamento</template>
+            <template v-else-if="tarefa.estado === 'PAUSED'">Pausada</template>
+            <template v-else>Toque para iniciar</template>
+          </span>
+        </div>
+      </div>
+
+      <!-- Timer -->
       <span
-        v-else
-        @click="editando = true"
-        class="text-sm text-feitu-text dark:text-night-text truncate block cursor-text select-none"
-      >{{ tarefa.nome }}</span>
+        class="text-[20px] font-medium tabular-nums flex-shrink-0"
+        :class="{
+          'text-[#CF6A36]': tarefa.estado === 'RUNNING',
+          'text-[#8C857B]': tarefa.estado === 'PAUSED',
+          'text-[#C4BDB0] dark:text-night-text/25': tarefa.estado === 'IDLE',
+        }"
+      >{{ formatarTempo(segundos) }}</span>
     </div>
 
-    <!-- Timer -->
-    <span
-      class="font-mono text-sm tabular-nums flex-shrink-0 min-w-[3rem] text-right"
-      :class="tarefa.estado === 'RUNNING' ? 'text-feitu-text dark:text-night-text' : 'text-feitu-text/35 dark:text-night-text/35'"
-    >{{ formatarTempo(segundos) }}</span>
+    <!-- Barra de ações -->
+    <div class="flex items-center gap-[6px] px-4 pb-[12px]">
+      <!-- Nota -->
+      <button
+        @click="noteOpen = true"
+        class="w-[30px] h-[30px] flex items-center justify-center rounded-[9px] border transition"
+        :class="tarefa.descricao
+          ? 'border-[rgba(138,95,192,.28)] bg-[#F3ECFB] text-[#8A5FC0] dark:bg-[rgba(138,95,192,.15)] dark:border-[rgba(138,95,192,.25)]'
+          : 'border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.08)] bg-white dark:bg-night-surface text-[#A39C90]'"
+        title="Nota"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </button>
 
-    <!-- Estado: confirmação de delete -->
-    <template v-if="confirmandoDelete">
+      <!-- Concluir (só quando ativo) -->
+      <button
+        v-if="tarefa.estado !== 'IDLE'"
+        @click="acao(() => store.pararTimer(workspaceId, tarefa.id))"
+        :disabled="carregando"
+        class="w-[30px] h-[30px] flex items-center justify-center rounded-[9px] border border-[rgba(47,125,99,.25)] bg-[#EAF6F0] text-[#2F7D63] dark:bg-[rgba(47,125,99,.12)] dark:border-[rgba(47,125,99,.2)] transition disabled:opacity-40"
+        title="Concluir"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </button>
+
+      <!-- Deletar -->
       <button
         @click="acao(() => store.deletar(workspaceId, tarefa.id))"
         :disabled="carregando"
-        class="h-8 px-2 flex-shrink-0 flex items-center justify-center rounded-xl bg-red-100 text-red-600 text-xs font-medium hover:bg-red-200 transition disabled:opacity-40"
-      >apagar</button>
-      <button
-        @click="confirmandoDelete = false"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/50 dark:text-night-text/50 text-xs hover:bg-gray-100 dark:hover:bg-night-bg/80 transition"
-      >✗</button>
-    </template>
-
-    <!-- Estado: botões normais -->
-    <template v-else>
-      <button
-        v-if="tarefa.estado === 'RUNNING' || tarefa.estado === 'PAUSED'"
-        @click="acao(() => store.pararTimer(workspaceId, tarefa.id))"
-        :disabled="carregando"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-feitu-bg dark:bg-night-bg text-feitu-text/40 dark:text-night-text/40 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-400 transition disabled:opacity-40"
-        title="Concluir"
-      >⏹</button>
-      <button
-        @click="confirmandoDelete = true"
-        :disabled="carregando"
-        class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl text-feitu-text/20 dark:text-night-text/20 text-sm hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-40"
+        class="w-[30px] h-[30px] flex items-center justify-center rounded-[9px] border border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.08)] bg-white dark:bg-night-surface text-[#B0A89B] hover:text-red-400 hover:border-red-200 transition disabled:opacity-40"
         title="Deletar"
-      >✕</button>
-    </template>
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
   </div>
+
+  <!-- Note bottom sheet -->
+  <Teleport to="body">
+    <div v-if="noteOpen" class="fixed inset-0 z-30 flex items-end" @click.self="noteOpen = false">
+      <div class="absolute inset-0 bg-black/25 dark:bg-black/50" @click="noteOpen = false"/>
+      <div class="relative w-full max-w-lg mx-auto bg-white dark:bg-night-surface rounded-t-[28px] p-5 pb-8 shadow-xl">
+        <div class="w-10 h-1 rounded-full bg-[#DDD8CE] mx-auto mb-4"/>
+        <p class="text-[13px] font-semibold text-feitu-text dark:text-night-text mb-2">Nota — {{ tarefa.nome }}</p>
+        <textarea
+          v-model="noteText"
+          rows="5"
+          placeholder="Adicione uma nota ou descrição..."
+          class="w-full text-[13.5px] text-feitu-text dark:text-night-text bg-[#F7F4EE] dark:bg-night-card border border-[rgba(54,51,46,.08)] dark:border-[rgba(255,255,255,.06)] rounded-[14px] p-3 outline-none resize-none placeholder:text-[#C4BDB0]"
+        />
+        <div class="flex gap-2 mt-3">
+          <button
+            @click="noteOpen = false"
+            class="flex-1 py-[10px] rounded-[12px] border border-[rgba(54,51,46,.1)] text-[#8C857B] text-[13.5px] font-medium"
+          >Cancelar</button>
+          <button
+            @click="salvarNota"
+            class="flex-1 py-[10px] rounded-[12px] bg-feitu-blue-deep text-white text-[13.5px] font-semibold"
+          >Salvar</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>

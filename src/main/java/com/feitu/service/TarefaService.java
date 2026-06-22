@@ -95,6 +95,12 @@ public class TarefaService {
         return tarefaRepository.save(t);
     }
 
+    public Tarefa atualizarDescricao(UUID id, UUID usuarioId, String descricao) {
+        Tarefa t = buscarDoUsuario(id, usuarioId);
+        t.setDescricao(descricao);
+        return tarefaRepository.save(t);
+    }
+
     public void deletar(UUID id, UUID usuarioId) {
         Tarefa t = buscarDoUsuario(id, usuarioId);
         segmentoTempoService.deletarPorTarefa(id);

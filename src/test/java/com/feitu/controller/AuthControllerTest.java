@@ -12,6 +12,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.test.context.jdbc.Sql;
+
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql("/test-invite.sql")
 class AuthControllerTest {
 
     @Autowired MockMvc mvc;
@@ -29,7 +32,7 @@ class AuthControllerTest {
     void registroRetorna201ComToken() throws Exception {
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("a@test.com", "senha1234"))))
+                        .content(json.writeValueAsString(new RegisterRequest("a@test.com", "senha1234", "TEST-CODE"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token", notNullValue()));
     }
@@ -51,7 +54,7 @@ class AuthControllerTest {
 
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("dup@test.com", "senha1234"))))
+                        .content(json.writeValueAsString(new RegisterRequest("dup@test.com", "senha1234", "INVALID"))))
                 .andExpect(status().isUnprocessableEntity());
     }
 
@@ -75,7 +78,7 @@ class AuthControllerTest {
     void emailInvalidoRetorna400() throws Exception {
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("nao-e-email", "senha1234"))))
+                        .content(json.writeValueAsString(new RegisterRequest("nao-e-email", "senha1234", "TEST-CODE"))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -83,13 +86,13 @@ class AuthControllerTest {
     void senhaCurtaRetorna400() throws Exception {
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("curta@test.com", "123"))))
+                        .content(json.writeValueAsString(new RegisterRequest("curta@test.com", "123", "TEST-CODE"))))
                 .andExpect(status().isBadRequest());
     }
 
     private void registrar(String email, String senha) throws Exception {
         mvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(new RegisterRequest(email, senha))));
+                .content(json.writeValueAsString(new RegisterRequest(email, senha, "TEST-CODE"))));
     }
 }

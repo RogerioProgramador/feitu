@@ -12,12 +12,14 @@ public record TarefaResponse(
         TarefaEstado estado,
         long tempoTotalSegundos,
         LocalDateTime criadoEm,
-        LocalDateTime concluidoEm
+        LocalDateTime concluidoEm,
+        String descricao
 ) {
     public static TarefaResponse from(Tarefa t, long tempoTotalSegundos) {
         return new TarefaResponse(
                 t.getId(), t.getNome(), t.getEstado(),
-                tempoTotalSegundos, t.getCriadoEm(), t.getConcluidoEm()
+                tempoTotalSegundos, t.getCriadoEm(), t.getConcluidoEm(),
+                t.getDescricao()
         );
     }
 }

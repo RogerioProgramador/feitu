@@ -1,0 +1,1 @@
+INSERT INTO invite_codes (id, code, ativo) VALUES ('00000000-0000-0000-0000-000000000001', 'TEST-CODE', true);

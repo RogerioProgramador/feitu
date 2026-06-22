@@ -16,8 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('feitu_email', emailInput)
   }
 
-  async function register(emailInput: string, senha: string) {
-    const res = await http.post<{ token: string }>('/auth/register', { email: emailInput, senha })
+  async function register(emailInput: string, senha: string, codigoConvite: string) {
+    const res = await http.post<{ token: string }>('/auth/register', { email: emailInput, senha, codigoConvite })
     token.value = res.data.token
     email.value = emailInput
     localStorage.setItem('feitu_token', res.data.token)

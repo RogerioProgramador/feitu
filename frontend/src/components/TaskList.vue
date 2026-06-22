@@ -4,7 +4,8 @@ import { useTarefaStore } from '../stores/tarefaStore'
 import TaskItem from './TaskItem.vue'
 import CompletedSection from './CompletedSection.vue'
 
-const props = defineProps<{ workspaceId: string }>()
+const props = defineProps<{ workspaceId: string; workspaceCor?: string }>()
+const emit = defineEmits<{ (e: 'abrirHistorico'): void }>()
 
 const store = useTarefaStore()
 
@@ -25,7 +26,7 @@ async function novaTarefa() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 p-4">
+  <div class="flex flex-col gap-[10px] p-4">
     <TaskItem
       v-for="t in ativas"
       :key="t.id"
@@ -35,12 +36,16 @@ async function novaTarefa() {
 
     <button
       @click="novaTarefa"
-      class="flex items-center gap-2 px-4 py-3 text-feitu-text/50 dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text text-sm rounded-2xl hover:bg-white/60 dark:hover:bg-night-surface/60 transition text-left"
+      class="flex items-center gap-2 px-4 py-3 text-feitu-text/50 dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text text-[13.5px] rounded-[15px] hover:bg-white/60 dark:hover:bg-night-surface/60 transition text-left border border-dashed border-[rgba(54,51,46,.15)] dark:border-[rgba(255,255,255,.08)]"
     >
       <span class="text-lg leading-none">+</span>
       <span>Nova tarefa</span>
     </button>
 
-    <CompletedSection :workspace-id="workspaceId" :tarefas="todas" />
+    <CompletedSection
+      :workspace-id="workspaceId"
+      :tarefas="todas"
+      @abrir-historico="emit('abrirHistorico')"
+    />
   </div>
 </template>

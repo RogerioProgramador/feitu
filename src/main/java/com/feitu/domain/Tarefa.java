@@ -28,6 +28,9 @@ public class Tarefa {
 
     private LocalDateTime concluidoEm;
 
+    @Column(columnDefinition = "TEXT")
+    private String descricao;
+
     @PrePersist
     void prePersist() {
         criadoEm = LocalDateTime.now();
@@ -43,4 +46,6 @@ public class Tarefa {
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getConcluidoEm() { return concluidoEm; }
     public void setConcluidoEm(LocalDateTime concluidoEm) { this.concluidoEm = concluidoEm; }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 }
