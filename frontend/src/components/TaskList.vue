@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useTarefaStore } from '../stores/tarefaStore'
+import type { TarefaEstado } from '../types'
 import TaskItem from './TaskItem.vue'
 import CompletedSection from './CompletedSection.vue'
 
@@ -9,8 +10,13 @@ const emit = defineEmits<{ (e: 'abrirHistorico'): void }>()
 
 const store = useTarefaStore()
 
+const STATUS_ORDER: Record<TarefaEstado, number> = { RUNNING: 0, PAUSED: 1, IDLE: 2, DONE: 3 }
+
 const ativas = computed(() =>
-  (store.tarefas[props.workspaceId] ?? []).filter((t) => t.estado !== 'DONE'),
+  (store.tarefas[props.workspaceId] ?? [])
+    .filter((t) => t.estado !== 'DONE')
+    .slice()
+    .sort((a, b) => STATUS_ORDER[a.estado] - STATUS_ORDER[b.estado]),
 )
 const todas = computed(() => store.tarefas[props.workspaceId] ?? [])
 

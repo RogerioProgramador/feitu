@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTarefaStore } from '../stores/tarefaStore'
 import { useTimer } from '../composables/useTimer'
 import { formatarTempo } from '../utils/formatarTempo'
@@ -16,7 +16,9 @@ const editando = ref(false)
 const nomeEdit = ref(props.tarefa.nome)
 const carregando = ref(false)
 const noteOpen = ref(false)
-const noteText = ref(props.tarefa.descricao ?? '')
+const noteEditMode = ref(false)
+const noteText = ref('')
+const confirmDeleteOpen = ref(false)
 
 async function acao(fn: () => Promise<unknown>) {
   if (carregando.value) return
@@ -31,9 +33,17 @@ async function salvarNome() {
   }
 }
 
+watch(noteOpen, (open) => {
+  if (open) {
+    noteText.value = props.tarefa.descricao ?? ''
+    noteEditMode.value = !props.tarefa.descricao
+  }
+})
+
 async function salvarNota() {
   await store.atualizarDescricao(props.workspaceId, props.tarefa.id, noteText.value || null)
   noteOpen.value = false
+  noteEditMode.value = false
 }
 
 const acaoPrincipal = computed(() =>
@@ -177,7 +187,7 @@ const cardClass = computed(() => {
 
       <!-- Deletar -->
       <button
-        @click="acao(() => store.deletar(workspaceId, tarefa.id))"
+        @click="confirmDeleteOpen = true"
         :disabled="carregando"
         class="w-[30px] h-[30px] flex items-center justify-center rounded-[9px] border border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.08)] bg-white dark:bg-night-surface text-[#B0A89B] hover:text-red-400 hover:border-red-200 transition disabled:opacity-40"
         title="Deletar"
@@ -195,8 +205,22 @@ const cardClass = computed(() => {
       <div class="absolute inset-0 bg-black/25 dark:bg-black/50" @click="noteOpen = false"/>
       <div class="relative w-full max-w-lg mx-auto bg-white dark:bg-night-surface rounded-t-[28px] p-5 pb-8 shadow-xl">
         <div class="w-10 h-1 rounded-full bg-[#DDD8CE] mx-auto mb-4"/>
-        <p class="text-[13px] font-semibold text-feitu-text dark:text-night-text mb-2">Nota — {{ tarefa.nome }}</p>
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-[13px] font-semibold text-feitu-text dark:text-night-text">Nota — {{ tarefa.nome }}</p>
+          <button
+            v-if="!noteEditMode && noteText"
+            @click="noteEditMode = true"
+            class="text-[12px] font-medium text-[#8A5FC0] px-3 py-1 rounded-[8px] bg-[#F3ECFB] dark:bg-[rgba(138,95,192,.15)]"
+          >Editar</button>
+        </div>
+        <!-- Preview mode -->
+        <div
+          v-if="!noteEditMode && noteText"
+          class="w-full text-[13.5px] text-feitu-text dark:text-night-text bg-[#F7F4EE] dark:bg-night-card border border-[rgba(54,51,46,.08)] dark:border-[rgba(255,255,255,.06)] rounded-[14px] p-3 min-h-[80px] whitespace-pre-wrap break-words"
+        >{{ noteText }}</div>
+        <!-- Edit mode -->
         <textarea
+          v-else
           v-model="noteText"
           rows="5"
           placeholder="Adicione uma nota ou descrição..."
@@ -204,13 +228,36 @@ const cardClass = computed(() => {
         />
         <div class="flex gap-2 mt-3">
           <button
-            @click="noteOpen = false"
+            @click="noteOpen = false; noteEditMode = false"
             class="flex-1 py-[10px] rounded-[12px] border border-[rgba(54,51,46,.1)] text-[#8C857B] text-[13.5px] font-medium"
           >Cancelar</button>
           <button
+            v-if="noteEditMode || !noteText"
             @click="salvarNota"
             class="flex-1 py-[10px] rounded-[12px] bg-feitu-blue-deep text-white text-[13.5px] font-semibold"
           >Salvar</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <!-- Delete confirmation sheet -->
+  <Teleport to="body">
+    <div v-if="confirmDeleteOpen" class="fixed inset-0 z-30 flex items-end">
+      <div class="absolute inset-0 bg-black/25 dark:bg-black/50" @click="confirmDeleteOpen = false"/>
+      <div class="relative w-full max-w-lg mx-auto bg-white dark:bg-night-surface rounded-t-[28px] p-5 pb-8 shadow-xl">
+        <div class="w-10 h-1 rounded-full bg-[#DDD8CE] mx-auto mb-4"/>
+        <p class="text-[15px] font-semibold text-feitu-text dark:text-night-text mb-1">Excluir tarefa</p>
+        <p class="text-[13px] text-[#8C857B] mb-5">Tem certeza que deseja excluir "{{ tarefa.nome }}"?</p>
+        <div class="flex gap-2">
+          <button
+            @click="confirmDeleteOpen = false"
+            class="flex-1 py-[10px] rounded-[12px] border border-[rgba(54,51,46,.1)] text-[#8C857B] text-[13.5px] font-medium"
+          >Cancelar</button>
+          <button
+            @click="acao(() => store.deletar(workspaceId, tarefa.id)); confirmDeleteOpen = false"
+            class="flex-1 py-[10px] rounded-[12px] bg-red-500 text-white text-[13.5px] font-semibold"
+          >Excluir</button>
         </div>
       </div>
     </div>
