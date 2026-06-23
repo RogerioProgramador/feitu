@@ -1,9 +1,12 @@
 package com.feitu.service;
 
 import com.feitu.config.ResourceNotFoundException;
+import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
+import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.repository.TarefaRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.repository.WorkspaceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +31,8 @@ class WorkspaceServiceTest {
 
     @Mock WorkspaceRepository workspaceRepository;
     @Mock UsuarioRepository usuarioRepository;
+    @Mock TarefaRepository tarefaRepository;
+    @Mock SegmentoTempoRepository segmentoTempoRepository;
     @InjectMocks WorkspaceService service;
 
     UUID usuarioId = UUID.randomUUID();
@@ -65,6 +70,25 @@ class WorkspaceServiceTest {
 
         assertThatThrownBy(() -> service.deletar(UUID.randomUUID(), usuarioId))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void deletarWorkspaceDeletaSegmentosETarefasEmCascata() {
+        UUID wsId = UUID.randomUUID();
+        Workspace ws = new Workspace();
+        ws.setNome("WS");
+
+        Tarefa tarefa = new Tarefa();
+        UUID tarefaId = UUID.randomUUID();
+
+        when(workspaceRepository.findByIdAndUsuarioId(wsId, usuarioId)).thenReturn(Optional.of(ws));
+        when(tarefaRepository.findByWorkspaceId(wsId)).thenReturn(List.of(tarefa));
+
+        service.deletar(wsId, usuarioId);
+
+        verify(segmentoTempoRepository).deleteByTarefaId(any());
+        verify(tarefaRepository).deleteAll(List.of(tarefa));
+        verify(workspaceRepository).delete(ws);
     }
 
     @Test

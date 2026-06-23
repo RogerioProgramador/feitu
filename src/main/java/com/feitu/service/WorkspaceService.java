@@ -1,9 +1,12 @@
 package com.feitu.service;
 
 import com.feitu.config.ResourceNotFoundException;
+import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
+import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.repository.TarefaRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.repository.WorkspaceRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,10 +22,15 @@ public class WorkspaceService {
 
     private final WorkspaceRepository workspaceRepository;
     private final UsuarioRepository usuarioRepository;
+    private final TarefaRepository tarefaRepository;
+    private final SegmentoTempoRepository segmentoTempoRepository;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, UsuarioRepository usuarioRepository) {
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UsuarioRepository usuarioRepository,
+                            TarefaRepository tarefaRepository, SegmentoTempoRepository segmentoTempoRepository) {
         this.workspaceRepository = workspaceRepository;
         this.usuarioRepository = usuarioRepository;
+        this.tarefaRepository = tarefaRepository;
+        this.segmentoTempoRepository = segmentoTempoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -65,6 +73,11 @@ public class WorkspaceService {
 
     public void deletar(UUID id, UUID usuarioId) {
         Workspace ws = buscarDoUsuario(id, usuarioId);
+        List<Tarefa> tarefas = tarefaRepository.findByWorkspaceId(id);
+        for (Tarefa tarefa : tarefas) {
+            segmentoTempoRepository.deleteByTarefaId(tarefa.getId());
+        }
+        tarefaRepository.deleteAll(tarefas);
         workspaceRepository.delete(ws);
     }
 

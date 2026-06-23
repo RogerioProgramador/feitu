@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAuthStore } from '../stores/authStore'
@@ -9,8 +10,16 @@ const settings = useSettingsStore()
 const authStore = useAuthStore()
 const wsStore = useWorkspaceStore()
 
-async function deletarWorkspace(id: string) {
-  await wsStore.deletar(id)
+const pendingDeleteId = ref<string | null>(null)
+
+function solicitarDelecao(id: string) {
+  pendingDeleteId.value = id
+}
+
+async function confirmarDelecao() {
+  if (!pendingDeleteId.value) return
+  await wsStore.deletar(pendingDeleteId.value)
+  pendingDeleteId.value = null
 }
 
 function sair() {
@@ -99,7 +108,7 @@ function sair() {
           <span class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: ws.cor ?? '#A7C7E7' }"/>
           <span class="flex-1 text-[14px] text-feitu-text dark:text-night-text">{{ ws.nome }}</span>
           <button
-            @click="deletarWorkspace(ws.id)"
+            @click="solicitarDelecao(ws.id)"
             class="w-[28px] h-[28px] flex items-center justify-center rounded-[8px] text-[#B0A89B] hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
             title="Deletar workspace"
           >
@@ -122,4 +131,29 @@ function sair() {
 
     </div>
   </div>
+
+  <!-- Workspace delete confirmation -->
+  <Teleport to="body">
+    <div v-if="pendingDeleteId" class="fixed inset-0 z-30 flex items-end">
+      <div class="absolute inset-0 bg-black/25 dark:bg-black/50" @click="pendingDeleteId = null"/>
+      <div class="relative w-full max-w-lg mx-auto bg-white dark:bg-night-surface rounded-t-[28px] p-5 pb-8 shadow-xl">
+        <div class="w-10 h-1 rounded-full bg-[#DDD8CE] mx-auto mb-4"/>
+        <p class="text-[15px] font-semibold text-feitu-text dark:text-night-text mb-1">Excluir workspace</p>
+        <p class="text-[13px] text-[#8C857B] mb-5">
+          Tem certeza que deseja excluir "{{ wsStore.workspaces.find(w => w.id === pendingDeleteId)?.nome }}"?
+          Todas as tarefas e registros de tempo serão removidos.
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="pendingDeleteId = null"
+            class="flex-1 py-[10px] rounded-[12px] border border-[rgba(54,51,46,.1)] text-[#8C857B] text-[13.5px] font-medium"
+          >Cancelar</button>
+          <button
+            @click="confirmarDelecao"
+            class="flex-1 py-[10px] rounded-[12px] bg-red-500 text-white text-[13.5px] font-semibold"
+          >Excluir</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
