@@ -19,7 +19,7 @@ const diaSemana = computed(() => {
 
 const dataFormatada = computed(() => {
   const d = new Date(hoje + 'T12:00:00')
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
+  return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
 })
 
 onMounted(() => wsStore.carregar())
@@ -28,49 +28,43 @@ onMounted(() => wsStore.carregar())
 <template>
   <div class="min-h-screen bg-feitu-bg dark:bg-night-bg flex flex-col max-w-[512px] mx-auto">
 
-    <!-- Header -->
-    <header class="flex items-center justify-between px-4 pt-5 pb-3">
-      <div class="flex items-center gap-[10px]">
-        <div class="flex-shrink-0 w-[34px] h-[34px] rounded-[11px] bg-[#EAF1F8] dark:bg-[#1A2330] flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
-            <circle cx="28" cy="28" r="18" stroke="#5E8BB6" stroke-width="4" stroke-linecap="round"
-              stroke-dasharray="87 26" fill="none" transform="rotate(-46 28 28)"/>
-            <path d="M19 28l6 6 12-12" stroke="#E07B4F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <!-- Header: data + botões de ação (sem logo) -->
+    <div class="flex items-start justify-between px-[22px] pt-[8px] pb-4">
+      <div>
+        <p class="text-[27px] font-medium text-feitu-text dark:text-night-text leading-[1.05] tracking-[-0.01em] capitalize">
+          {{ diaSemana }}
+        </p>
+        <div class="flex items-center gap-[9px] mt-[6px]">
+          <span class="flex-shrink-0 w-[20px] h-[3px] rounded-[2px] bg-feitu-blue-deep dark:bg-feitu-blue"></span>
+          <span class="text-[14px] text-[#8C857B] dark:text-[#8E8A9A] leading-none">{{ dataFormatada }}</span>
         </div>
-        <span class="font-display italic text-[26px] text-feitu-text dark:text-night-text leading-none select-none">Feitu</span>
       </div>
 
-      <div class="flex items-center gap-[8px]">
+      <div class="flex items-center gap-[8px] mt-[8px]">
+        <!-- Resumo: checklist-with-checks icon -->
         <RouterLink
           to="/analytics"
-          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] bg-white dark:bg-night-surface dark:border-[rgba(255,255,255,.06)] text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
+          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.08)] bg-[#F7F4EE] dark:bg-night-surface text-[#5E5A52] dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
           title="Resumo"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 6h11M9 12h11M9 18h11" stroke-width="2"/>
+            <path d="M4 6l1 1 1.6-1.8M4 12l1 1 1.6-1.8M4 18l1 1 1.6-1.8" stroke-width="1.8"/>
           </svg>
         </RouterLink>
 
+        <!-- Configurações: sliders icon -->
         <button
           @click="router.push('/settings')"
-          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] bg-white dark:bg-night-surface dark:border-[rgba(255,255,255,.06)] text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
+          class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.08)] bg-[#F7F4EE] dark:bg-night-surface text-[#5E5A52] dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
           title="Configurações"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M3 8h18M3 16h18"/>
+            <circle cx="9" cy="8" r="2.6" fill="#F7F4EE" stroke="currentColor" stroke-width="2"/>
+            <circle cx="15" cy="16" r="2.6" fill="#F7F4EE" stroke="currentColor" stroke-width="2"/>
           </svg>
         </button>
-      </div>
-    </header>
-
-    <!-- Data em destaque -->
-    <div class="px-4 pb-3">
-      <p class="text-[28px] font-semibold text-feitu-text dark:text-night-text leading-tight capitalize">{{ diaSemana }}</p>
-      <div class="flex items-center gap-2 mt-[2px]">
-        <p class="text-[13px] text-[#8C857B] dark:text-night-text/50">{{ dataFormatada }}</p>
-        <span class="flex-1 h-[1px] bg-[rgba(54,51,46,.1)] dark:bg-[rgba(255,255,255,.06)]"/>
       </div>
     </div>
 
@@ -82,8 +76,35 @@ onMounted(() => wsStore.carregar())
         :workspace-id="wsStore.ativoId"
         :date="hoje"
       />
-      <div v-else class="p-8 text-center text-feitu-text/40 dark:text-night-text/40 text-sm">
-        Crie um workspace para começar
+
+      <!-- Empty state -->
+      <div
+        v-else
+        class="flex flex-col items-center justify-center px-10 pb-[60px] text-center"
+        style="min-height: 400px;"
+      >
+        <div class="w-[104px] h-[104px] rounded-[28px] bg-[#F7F4EE] dark:bg-night-surface border border-[rgba(54,51,46,.07)] dark:border-[rgba(255,255,255,.05)] flex items-center justify-center shadow-[0_12px_30px_-16px_rgba(54,51,46,.3)]">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <rect x="3.5" y="6" width="17" height="13" rx="3" stroke="#A7C7E7" stroke-width="2"/>
+            <path d="M3.5 10h17" stroke="#A7C7E7" stroke-width="2"/>
+            <path d="M9 4.5h6" stroke="#FFDAC1" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="text-[20px] font-medium text-feitu-text dark:text-night-text mt-[26px] leading-[1.3]">
+          Crie um workspace para começar
+        </p>
+        <p class="text-[14.5px] text-[#8C857B] dark:text-night-text/50 mt-[10px] leading-[1.55]">
+          Organize suas tarefas por contexto — trabalho, estudos, casa.
+        </p>
+        <button
+          @click="router.push('/workspaces/new')"
+          class="flex items-center gap-[9px] mt-[26px] px-[22px] py-[14px] rounded-[14px] bg-feitu-blue-deep text-white text-[15px] font-semibold shadow-[0_10px_24px_-10px_rgba(94,139,182,.6)]"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Criar workspace
+        </button>
       </div>
     </div>
 
