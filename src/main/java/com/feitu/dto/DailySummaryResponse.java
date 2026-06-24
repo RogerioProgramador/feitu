@@ -5,8 +5,8 @@ import java.util.List;
 
 public record DailySummaryResponse(
         LocalDate data,
-        long totalSegundos,
-        List<WorkspaceSummary> porcWorkspace,
-        List<TimelineItem> timeline,
-        TarefaResumo tarefaMaisLonga
+        int totalTarefas,
+        int concluidas,
+        List<TarefaItemResponse> recorrentes,
+        List<TarefaItemResponse> pontuais
 ) {}

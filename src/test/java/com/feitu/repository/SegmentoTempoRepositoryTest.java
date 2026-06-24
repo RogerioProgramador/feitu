@@ -5,26 +5,31 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Testes de ConclusaoRecorrenteRepository (arquivo mantido como SegmentoTempoRepositoryTest).
+ */
 @DataJpaTest
 class SegmentoTempoRepositoryTest {
 
     @Autowired UsuarioRepository usuarioRepo;
     @Autowired WorkspaceRepository workspaceRepo;
     @Autowired TarefaRepository tarefaRepo;
-    @Autowired SegmentoTempoRepository segmentoRepo;
+    @Autowired ConclusaoRecorrenteRepository conclusaoRepo;
 
     Tarefa tarefa;
 
     @BeforeEach
     void setup() {
         Usuario u = new Usuario();
-        u.setEmail("s@test.com");
+        u.setEmail("c@test.com");
         u.setSenhaHash("hash");
         u = usuarioRepo.save(u);
 
@@ -35,50 +40,56 @@ class SegmentoTempoRepositoryTest {
         ws = workspaceRepo.save(ws);
 
         Tarefa t = new Tarefa();
-        t.setNome("Tarefa");
+        t.setNome("Meditação");
+        t.setTipo(TipoTarefa.RECORRENTE);
+        t.setDiasSemana("SEG,QUA,SEX");
         t.setWorkspace(ws);
         tarefa = tarefaRepo.save(t);
     }
 
     @Test
-    void segmentoAbertoRetornadoPorFimIsNull() {
-        SegmentoTempo aberto = new SegmentoTempo();
-        aberto.setTarefa(tarefa);
-        aberto.setInicio(Instant.now());
-        segmentoRepo.save(aberto);
+    void buscaPorTarefaIdEData() {
+        LocalDate hoje = LocalDate.now();
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, hoje, LocalDateTime.now()));
 
-        SegmentoTempo fechado = new SegmentoTempo();
-        fechado.setTarefa(tarefa);
-        fechado.setInicio(Instant.now().minusSeconds(60));
-        fechado.setFim(Instant.now());
-        segmentoRepo.save(fechado);
-
-        Optional<SegmentoTempo> found = segmentoRepo.findByTarefaIdAndFimIsNull(tarefa.getId());
+        Optional<ConclusaoRecorrente> found = conclusaoRepo.findByTarefaIdAndData(tarefa.getId(), hoje);
         assertThat(found).isPresent();
-        assertThat(found.get().getFim()).isNull();
+        assertThat(found.get().getData()).isEqualTo(hoje);
     }
 
     @Test
-    void semSegmentoAbertoRetornaVazio() {
-        SegmentoTempo fechado = new SegmentoTempo();
-        fechado.setTarefa(tarefa);
-        fechado.setInicio(Instant.now().minusSeconds(30));
-        fechado.setFim(Instant.now());
-        segmentoRepo.save(fechado);
+    void datasDiferentesNaoColidem() {
+        LocalDate d1 = LocalDate.of(2026, 6, 22);
+        LocalDate d2 = LocalDate.of(2026, 6, 23);
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, d1, LocalDateTime.now()));
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, d2, LocalDateTime.now()));
 
-        assertThat(segmentoRepo.findByTarefaIdAndFimIsNull(tarefa.getId())).isEmpty();
+        assertThat(conclusaoRepo.findByTarefaIdAndData(tarefa.getId(), d1)).isPresent();
+        assertThat(conclusaoRepo.findByTarefaIdAndData(tarefa.getId(), d2)).isPresent();
     }
 
     @Test
-    void listaTodosSegmentosDaTarefa() {
-        for (int i = 0; i < 3; i++) {
-            SegmentoTempo s = new SegmentoTempo();
-            s.setTarefa(tarefa);
-            s.setInicio(Instant.now().minusSeconds(100 - i));
-            s.setFim(Instant.now().minusSeconds(50 - i));
-            segmentoRepo.save(s);
-        }
+    void deleteByTarefaIdEDataRemoveSomenteAlvo() {
+        LocalDate d1 = LocalDate.of(2026, 6, 22);
+        LocalDate d2 = LocalDate.of(2026, 6, 23);
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, d1, LocalDateTime.now()));
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, d2, LocalDateTime.now()));
 
-        assertThat(segmentoRepo.findByTarefaId(tarefa.getId())).hasSize(3);
+        conclusaoRepo.deleteByTarefaIdAndData(tarefa.getId(), d1);
+        conclusaoRepo.flush();
+
+        assertThat(conclusaoRepo.findByTarefaIdAndData(tarefa.getId(), d1)).isEmpty();
+        assertThat(conclusaoRepo.findByTarefaIdAndData(tarefa.getId(), d2)).isPresent();
+    }
+
+    @Test
+    void duplicataTarefaDataLancaViolacao() {
+        LocalDate hoje = LocalDate.now();
+        conclusaoRepo.save(new ConclusaoRecorrente(tarefa, hoje, LocalDateTime.now()));
+
+        assertThatThrownBy(() -> {
+            conclusaoRepo.save(new ConclusaoRecorrente(tarefa, hoje, LocalDateTime.now()));
+            conclusaoRepo.flush();
+        }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

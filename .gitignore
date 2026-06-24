@@ -37,3 +37,10 @@ historias/
 # Logs
 *.log
 logs/
+
+# Design specs (locais)
+specification-to-design
+Feitu v2.html
+Feitu v2.dc.html
+spec-design-v2.md
+test-ux-audit.mjs

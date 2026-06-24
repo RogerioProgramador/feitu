@@ -1,25 +1,46 @@
 package com.feitu.dto;
 
 import com.feitu.domain.Tarefa;
-import com.feitu.domain.TarefaEstado;
+import com.feitu.domain.TipoTarefa;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public record TarefaResponse(
         UUID id,
         String nome,
-        TarefaEstado estado,
-        long tempoTotalSegundos,
+        TipoTarefa tipo,
+        boolean concluida,
+        LocalDateTime concluidaEm,
+        LocalDate data,
+        List<String> diasSemana,
+        LocalTime horario,
         LocalDateTime criadoEm,
-        LocalDateTime concluidoEm,
         String descricao
 ) {
-    public static TarefaResponse from(Tarefa t, long tempoTotalSegundos) {
+    public static TarefaResponse from(Tarefa t, boolean concluida) {
+        List<String> dias = t.getDiasSemana() != null && !t.getDiasSemana().isBlank()
+                ? Arrays.asList(t.getDiasSemana().split(","))
+                : List.of();
         return new TarefaResponse(
-                t.getId(), t.getNome(), t.getEstado(),
-                tempoTotalSegundos, t.getCriadoEm(), t.getConcluidoEm(),
+                t.getId(),
+                t.getNome(),
+                t.getTipo(),
+                concluida,
+                t.getConcluidaEm(),
+                t.getData(),
+                dias,
+                t.getHorario(),
+                t.getCriadoEm(),
                 t.getDescricao()
         );
+    }
+
+    public static TarefaResponse fromPontual(Tarefa t) {
+        return from(t, t.isConcluida());
     }
 }

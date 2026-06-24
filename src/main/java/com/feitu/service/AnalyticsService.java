@@ -1,88 +1,42 @@
 package com.feitu.service;
 
-import com.feitu.domain.SegmentoTempo;
-import com.feitu.dto.*;
-import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.domain.TipoTarefa;
+import com.feitu.dto.DailySummaryResponse;
+import com.feitu.dto.TarefaItemResponse;
+import com.feitu.dto.TarefaResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
 public class AnalyticsService {
 
-    private final SegmentoTempoRepository segmentoRepository;
+    private final TarefaService tarefaService;
 
-    public AnalyticsService(SegmentoTempoRepository segmentoRepository) {
-        this.segmentoRepository = segmentoRepository;
+    public AnalyticsService(TarefaService tarefaService) {
+        this.tarefaService = tarefaService;
     }
 
     public DailySummaryResponse sumarioDiario(UUID usuarioId, LocalDate data) {
-        ZoneId zone = ZoneId.of("America/Sao_Paulo");
-        Instant de = data.atStartOfDay(zone).toInstant();
-        Instant ate = data.plusDays(1).atStartOfDay(zone).toInstant();
+        List<TarefaResponse> todas = tarefaService.listarParaDiaDoUsuario(usuarioId, data);
 
-        List<SegmentoTempo> segmentos = segmentoRepository
-                .findByUsuarioIdAndInicioBetween(usuarioId, de, ate)
-                .stream()
-                .filter(s -> s.getFim() != null)
-                .collect(java.util.stream.Collectors.toMap(
-                        s -> s.getId(), s -> s, (a, b) -> a, java.util.LinkedHashMap::new))
-                .values().stream()
+        List<TarefaItemResponse> recorrentes = todas.stream()
+                .filter(t -> t.tipo() == TipoTarefa.RECORRENTE)
+                .map(t -> new TarefaItemResponse(t.id(), t.nome(), t.concluida(), t.tipo()))
                 .toList();
 
-        long totalSegundos = segmentos.stream()
-                .mapToLong(s -> Duration.between(s.getInicio(), s.getFim()).getSeconds())
-                .sum();
-
-        // Tempo por workspace
-        Map<UUID, Long> tempoWs = new LinkedHashMap<>();
-        Map<UUID, String> nomeWs = new HashMap<>();
-        Map<UUID, String> corWs = new HashMap<>();
-
-        for (SegmentoTempo s : segmentos) {
-            var ws = s.getTarefa().getWorkspace();
-            long dur = Duration.between(s.getInicio(), s.getFim()).getSeconds();
-            tempoWs.merge(ws.getId(), dur, Long::sum);
-            nomeWs.put(ws.getId(), ws.getNome());
-            corWs.put(ws.getId(), ws.getCor());
-        }
-
-        List<WorkspaceSummary> porcWorkspace = tempoWs.entrySet().stream()
-                .sorted(Map.Entry.<UUID, Long>comparingByValue().reversed())
-                .map(e -> new WorkspaceSummary(e.getKey(), nomeWs.get(e.getKey()), corWs.get(e.getKey()), e.getValue()))
+        List<TarefaItemResponse> pontuais = todas.stream()
+                .filter(t -> t.tipo() == TipoTarefa.PONTUAL)
+                .map(t -> new TarefaItemResponse(t.id(), t.nome(), t.concluida(), t.tipo()))
                 .toList();
 
-        // Timeline cronológica
-        List<TimelineItem> timeline = segmentos.stream()
-                .sorted(Comparator.comparing(SegmentoTempo::getInicio))
-                .map(s -> new TimelineItem(
-                        s.getTarefa().getId(),
-                        s.getTarefa().getNome(),
-                        s.getTarefa().getWorkspace().getCor(),
-                        s.getInicio(),
-                        s.getFim()))
-                .toList();
+        int total = todas.size();
+        int concluidas = (int) todas.stream().filter(TarefaResponse::concluida).count();
 
-        // Tarefa com mais tempo
-        Map<UUID, Long> tempoPorTarefa = segmentos.stream()
-                .collect(Collectors.groupingBy(
-                        s -> s.getTarefa().getId(),
-                        Collectors.summingLong(s -> Duration.between(s.getInicio(), s.getFim()).getSeconds())
-                ));
-
-        TarefaResumo tarefaMaisLonga = tempoPorTarefa.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .flatMap(e -> segmentos.stream()
-                        .filter(s -> s.getTarefa().getId().equals(e.getKey()))
-                        .findFirst()
-                        .map(s -> new TarefaResumo(e.getKey(), s.getTarefa().getNome(), e.getValue())))
-                .orElse(null);
-
-        return new DailySummaryResponse(data, totalSegundos, porcWorkspace, timeline, tarefaMaisLonga);
+        return new DailySummaryResponse(data, total, concluidas, recorrentes, pontuais);
     }
 }

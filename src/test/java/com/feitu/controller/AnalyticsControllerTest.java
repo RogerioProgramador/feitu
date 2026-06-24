@@ -14,10 +14,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
-
-import org.springframework.test.context.jdbc.Sql;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,6 +36,7 @@ class AnalyticsControllerTest {
 
     String token;
     String workspaceId;
+    String hoje = LocalDate.now().toString();
 
     @BeforeEach
     void setup() throws Exception {
@@ -57,37 +59,38 @@ class AnalyticsControllerTest {
     }
 
     @Test
-    void diaSemTarefasRetornaZeros() throws Exception {
+    void diaSemTarefasRetornaZerosEListasVazias() throws Exception {
         mvc.perform(get("/api/analytics/daily")
-                        .param("date", LocalDate.now().toString())
+                        .param("date", hoje)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSegundos").value(0))
-                .andExpect(jsonPath("$.porcWorkspace", hasSize(0)))
-                .andExpect(jsonPath("$.timeline", hasSize(0)))
-                .andExpect(jsonPath("$.tarefaMaisLonga").doesNotExist());
+                .andExpect(jsonPath("$.totalTarefas").value(0))
+                .andExpect(jsonPath("$.concluidas").value(0))
+                .andExpect(jsonPath("$.recorrentes", hasSize(0)))
+                .andExpect(jsonPath("$.pontuais", hasSize(0)));
     }
 
     @Test
-    void comTarefasRetornaTotalPositivo() throws Exception {
-        // criar tarefa, iniciar e parar
+    void comTarefaPontualConcluidaRetornaConcluidas1() throws Exception {
         MvcResult criar = mvc.perform(post("/api/workspaces/" + workspaceId + "/tarefas")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content(json.writeValueAsString(Map.of("nome", "Estudar Vue", "tipo", "PONTUAL"))))
                 .andReturn();
         String tarefaId = json.readTree(criar.getResponse().getContentAsString()).get("id").asText();
 
-        mvc.perform(post("/api/tarefas/" + tarefaId + "/iniciar").header("Authorization", "Bearer " + token));
-        mvc.perform(post("/api/tarefas/" + tarefaId + "/parar").header("Authorization", "Bearer " + token));
+        mvc.perform(post("/api/tarefas/" + tarefaId + "/concluir")
+                .param("date", hoje)
+                .header("Authorization", "Bearer " + token));
 
         mvc.perform(get("/api/analytics/daily")
-                        .param("date", LocalDate.now().toString())
+                        .param("date", hoje)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSegundos", greaterThanOrEqualTo(0)))
-                .andExpect(jsonPath("$.porcWorkspace", hasSize(1)))
-                .andExpect(jsonPath("$.tarefaMaisLonga").isNotEmpty());
+                .andExpect(jsonPath("$.totalTarefas").value(1))
+                .andExpect(jsonPath("$.concluidas").value(1))
+                .andExpect(jsonPath("$.pontuais", hasSize(1)))
+                .andExpect(jsonPath("$.pontuais[0].concluida").value(true));
     }
 
     @Test
@@ -95,6 +98,18 @@ class AnalyticsControllerTest {
         mvc.perform(get("/api/analytics/daily")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").value(LocalDate.now().toString()));
+                .andExpect(jsonPath("$.data").value(hoje));
+    }
+
+    @Test
+    void novoShapeNaoContemCamposAntigos() throws Exception {
+        mvc.perform(get("/api/analytics/daily")
+                        .param("date", hoje)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSegundos").doesNotExist())
+                .andExpect(jsonPath("$.porcWorkspace").doesNotExist())
+                .andExpect(jsonPath("$.timeline").doesNotExist())
+                .andExpect(jsonPath("$.tarefaMaisLonga").doesNotExist());
     }
 }

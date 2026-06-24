@@ -1,4 +1,4 @@
-export type TarefaEstado = 'IDLE' | 'RUNNING' | 'PAUSED' | 'DONE'
+export type TipoTarefa = 'PONTUAL' | 'RECORRENTE'
 
 export interface Workspace {
   id: string
@@ -10,11 +10,22 @@ export interface Workspace {
 export interface Tarefa {
   id: string
   nome: string
-  estado: TarefaEstado
-  tempoTotalSegundos: number
+  tipo: TipoTarefa
+  concluida: boolean
+  concluidaEm: string | null
+  data: string | null
+  diasSemana: string[]
+  horario: string | null
   criadoEm: string
-  concluidoEm: string | null
   descricao?: string | null
+}
+
+export interface TarefaCreateRequest {
+  nome?: string
+  descricao?: string | null
+  tipo?: TipoTarefa
+  diasSemana?: string[]
+  horario?: string | null
 }
 
 export interface Usuario {
@@ -23,31 +34,17 @@ export interface Usuario {
   horarioNotificacao: string
 }
 
-export interface WorkspaceSummary {
-  workspaceId: string
-  nome: string
-  cor: string | null
-  segundos: number
-}
-
-export interface TimelineItem {
-  tarefaId: string
-  tarefaNome: string
-  workspaceCor: string | null
-  inicio: string
-  fim: string
-}
-
-export interface TarefaResumo {
+export interface TarefaItemResponse {
   id: string
   nome: string
-  segundos: number
+  concluida: boolean
+  tipo: TipoTarefa
 }
 
 export interface DailySummary {
   data: string
-  totalSegundos: number
-  porcWorkspace: WorkspaceSummary[]
-  timeline: TimelineItem[]
-  tarefaMaisLonga: TarefaResumo | null
+  totalTarefas: number
+  concluidas: number
+  recorrentes: TarefaItemResponse[]
+  pontuais: TarefaItemResponse[]
 }

@@ -30,15 +30,35 @@ export default {
         display: ['"Instrument Serif"', 'Georgia', 'serif'],
       },
       keyframes: {
-        'feitu-spin': { to: { transform: 'rotate(360deg)' } },
-        'feitu-breathe': {
-          '0%, 100%': { opacity: '.45', transform: 'scale(.7)' },
-          '50%': { opacity: '1', transform: 'scale(1)' },
+        'feitu-pop': {
+          '0%': { transform: 'scale(.55)' },
+          '60%': { transform: 'scale(1.14)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'feitu-fade': {
+          from: { opacity: '0', transform: 'translateY(-4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'feitu-sheet': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
+        'feitu-dim': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        'feitu-spring': {
+          '0%': { transform: 'scale(.3)', opacity: '0' },
+          '55%': { transform: 'scale(1.12)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
       },
       animation: {
-        'feitu-spin': 'feitu-spin 1.4s linear infinite',
-        'feitu-breathe': 'feitu-breathe 1.6s ease-in-out infinite',
+        'feitu-pop': 'feitu-pop .26s ease',
+        'feitu-fade': 'feitu-fade .2s ease',
+        'feitu-sheet': 'feitu-sheet .34s cubic-bezier(.22,1,.36,1)',
+        'feitu-dim': 'feitu-dim .25s ease',
+        'feitu-spring': 'feitu-spring .5s cubic-bezier(.22,1,.36,1)',
       },
     },
   },

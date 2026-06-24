@@ -5,14 +5,15 @@ import com.feitu.dto.TarefaDescricaoRequest;
 import com.feitu.dto.TarefaRequest;
 import com.feitu.dto.TarefaResponse;
 import com.feitu.repository.UsuarioRepository;
-import com.feitu.service.SegmentoTempoService;
 import com.feitu.service.TarefaService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,36 +21,31 @@ import java.util.UUID;
 public class TarefaController {
 
     private final TarefaService tarefaService;
-    private final SegmentoTempoService segmentoTempoService;
     private final UsuarioRepository usuarioRepository;
 
-    public TarefaController(
-            TarefaService tarefaService,
-            SegmentoTempoService segmentoTempoService,
-            UsuarioRepository usuarioRepository) {
+    public TarefaController(TarefaService tarefaService, UsuarioRepository usuarioRepository) {
         this.tarefaService = tarefaService;
-        this.segmentoTempoService = segmentoTempoService;
         this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping("/api/workspaces/{workspaceId}/tarefas")
     public List<TarefaResponse> listar(
             @PathVariable UUID workspaceId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @AuthenticationPrincipal UserDetails principal) {
-        UUID uid = usuarioId(principal);
-        return tarefaService.listar(workspaceId, uid).stream()
-                .map(t -> TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId())))
-                .toList();
+        LocalDate dia = date != null ? date : LocalDate.now();
+        return tarefaService.listarParaDia(workspaceId, usuarioId(principal), dia);
     }
 
     @PostMapping("/api/workspaces/{workspaceId}/tarefas")
     @ResponseStatus(HttpStatus.CREATED)
     public TarefaResponse criar(
             @PathVariable UUID workspaceId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody TarefaRequest req) {
-        var t = tarefaService.criar(workspaceId, usuarioId(principal), req);
-        return TarefaResponse.from(t, 0L);
+        LocalDate dia = date != null ? date : LocalDate.now();
+        return tarefaService.criar(workspaceId, usuarioId(principal), req, dia);
     }
 
     @PatchMapping("/api/tarefas/{id}/descricao")
@@ -57,8 +53,7 @@ public class TarefaController {
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody @Valid TarefaDescricaoRequest req) {
-        var t = tarefaService.atualizarDescricao(id, usuarioId(principal), req.descricao());
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
+        return tarefaService.atualizarDescricao(id, usuarioId(principal), req.descricao());
     }
 
     @PatchMapping("/api/tarefas/{id}/nome")
@@ -66,32 +61,25 @@ public class TarefaController {
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody @Valid RenomearRequest req) {
-        var t = tarefaService.renomear(id, usuarioId(principal), req.nome());
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
+        return tarefaService.renomear(id, usuarioId(principal), req.nome());
     }
 
-    @PostMapping("/api/tarefas/{id}/iniciar")
-    public TarefaResponse iniciar(@PathVariable UUID id, @AuthenticationPrincipal UserDetails principal) {
-        var t = tarefaService.iniciarTimer(id, usuarioId(principal));
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
+    @PostMapping("/api/tarefas/{id}/concluir")
+    public TarefaResponse concluir(
+            @PathVariable UUID id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @AuthenticationPrincipal UserDetails principal) {
+        LocalDate dia = date != null ? date : LocalDate.now();
+        return tarefaService.concluir(id, usuarioId(principal), dia);
     }
 
-    @PostMapping("/api/tarefas/{id}/pausar")
-    public TarefaResponse pausar(@PathVariable UUID id, @AuthenticationPrincipal UserDetails principal) {
-        var t = tarefaService.pausarTimer(id, usuarioId(principal));
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
-    }
-
-    @PostMapping("/api/tarefas/{id}/parar")
-    public TarefaResponse parar(@PathVariable UUID id, @AuthenticationPrincipal UserDetails principal) {
-        var t = tarefaService.pararTimer(id, usuarioId(principal));
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
-    }
-
-    @PostMapping("/api/tarefas/{id}/reativar")
-    public TarefaResponse reativar(@PathVariable UUID id, @AuthenticationPrincipal UserDetails principal) {
-        var t = tarefaService.reativar(id, usuarioId(principal));
-        return TarefaResponse.from(t, segmentoTempoService.calcularTempoTotalSegundos(t.getId()));
+    @PostMapping("/api/tarefas/{id}/reabrir")
+    public TarefaResponse reabrir(
+            @PathVariable UUID id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @AuthenticationPrincipal UserDetails principal) {
+        LocalDate dia = date != null ? date : LocalDate.now();
+        return tarefaService.reabrir(id, usuarioId(principal), dia);
     }
 
     @DeleteMapping("/api/tarefas/{id}")

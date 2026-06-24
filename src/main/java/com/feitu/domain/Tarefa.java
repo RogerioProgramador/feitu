@@ -1,7 +1,9 @@
 package com.feitu.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -17,7 +19,24 @@ public class Tarefa {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TarefaEstado estado = TarefaEstado.IDLE;
+    private TipoTarefa tipo = TipoTarefa.PONTUAL;
+
+    /** CSV dos dias da semana, ex: "SEG,QUA,SEX". Preenchido apenas para RECORRENTE. */
+    private String diasSemana;
+
+    /** Horário opcional para recorrentes, ex: 07:00. */
+    private LocalTime horario;
+
+    /** Data para a qual a tarefa pontual foi criada. Null para recorrentes. */
+    private LocalDate data;
+
+    @Column(nullable = false)
+    private boolean concluida = false;
+
+    private LocalDateTime concluidaEm;
+
+    @Column(columnDefinition = "TEXT")
+    private String descricao;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "workspace_id", nullable = false)
@@ -25,11 +44,6 @@ public class Tarefa {
 
     @Column(nullable = false)
     private LocalDateTime criadoEm;
-
-    private LocalDateTime concluidoEm;
-
-    @Column(columnDefinition = "TEXT")
-    private String descricao;
 
     @PrePersist
     void prePersist() {
@@ -39,13 +53,21 @@ public class Tarefa {
     public UUID getId() { return id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public TarefaEstado getEstado() { return estado; }
-    public void setEstado(TarefaEstado estado) { this.estado = estado; }
+    public TipoTarefa getTipo() { return tipo; }
+    public void setTipo(TipoTarefa tipo) { this.tipo = tipo; }
+    public String getDiasSemana() { return diasSemana; }
+    public void setDiasSemana(String diasSemana) { this.diasSemana = diasSemana; }
+    public LocalTime getHorario() { return horario; }
+    public void setHorario(LocalTime horario) { this.horario = horario; }
+    public LocalDate getData() { return data; }
+    public void setData(LocalDate data) { this.data = data; }
+    public boolean isConcluida() { return concluida; }
+    public void setConcluida(boolean concluida) { this.concluida = concluida; }
+    public LocalDateTime getConcluidaEm() { return concluidaEm; }
+    public void setConcluidaEm(LocalDateTime concluidaEm) { this.concluidaEm = concluidaEm; }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
     public Workspace getWorkspace() { return workspace; }
     public void setWorkspace(Workspace workspace) { this.workspace = workspace; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
-    public LocalDateTime getConcluidoEm() { return concluidoEm; }
-    public void setConcluidoEm(LocalDateTime concluidoEm) { this.concluidoEm = concluidoEm; }
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
 }

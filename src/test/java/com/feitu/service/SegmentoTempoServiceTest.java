@@ -1,9 +1,11 @@
 package com.feitu.service;
 
-import com.feitu.config.BusinessException;
-import com.feitu.domain.SegmentoTempo;
-import com.feitu.domain.Tarefa;
-import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.domain.*;
+import com.feitu.dto.DailySummaryResponse;
+import com.feitu.repository.ConclusaoRecorrenteRepository;
+import com.feitu.repository.TarefaRepository;
+import com.feitu.repository.WorkspaceRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,60 +22,93 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes de AnalyticsService (arquivo renomeado de SegmentoTempoServiceTest).
+ */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SegmentoTempoServiceTest {
 
-    @Mock SegmentoTempoRepository repo;
-    @InjectMocks SegmentoTempoService service;
+    @Mock TarefaRepository tarefaRepository;
+    @Mock WorkspaceRepository workspaceRepository;
+    @Mock ConclusaoRecorrenteRepository conclusaoRepository;
 
-    Tarefa tarefa = new Tarefa();
-    UUID tarefaId = UUID.randomUUID();
+    TarefaService tarefaService;
+    AnalyticsService analyticsService;
 
-    @Test
-    void abrirSegmentoCriaComInicioEFimNulo() {
-        when(repo.save(any())).thenAnswer(i -> i.getArgument(0));
+    UUID uid = UUID.randomUUID();
+    LocalDate hoje = LocalDate.of(2026, 6, 23); // terça
 
-        SegmentoTempo s = service.abrirSegmento(tarefa);
-
-        assertThat(s.getInicio()).isNotNull();
-        assertThat(s.getFim()).isNull();
+    @BeforeEach
+    void setup() {
+        tarefaService = new TarefaService(tarefaRepository, workspaceRepository, conclusaoRepository);
+        analyticsService = new AnalyticsService(tarefaService);
     }
 
     @Test
-    void fecharSegmentoSetaFim() {
-        SegmentoTempo aberto = new SegmentoTempo();
-        aberto.setInicio(Instant.now().minusSeconds(30));
-        when(repo.findByTarefaIdAndFimIsNull(any())).thenReturn(Optional.of(aberto));
-        when(repo.save(any())).thenAnswer(i -> i.getArgument(0));
+    void sumarioDiarioComMixRetornaTotalCorreto() {
+        Tarefa pontual = pontual(false);
+        Tarefa recorrente = recorrente(true);
 
-        SegmentoTempo fechado = service.fecharSegmentoAberto(tarefa);
+        when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
+        when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
+                .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
 
-        assertThat(fechado.getFim()).isNotNull();
+        DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
+
+        assertThat(r.totalTarefas()).isEqualTo(2);
+        assertThat(r.concluidas()).isEqualTo(1); // só a recorrente está concluída
+        assertThat(r.recorrentes()).hasSize(1);
+        assertThat(r.pontuais()).hasSize(1);
     }
 
     @Test
-    void fecharSemAbertosLancaExcecao() {
-        when(repo.findByTarefaIdAndFimIsNull(any())).thenReturn(Optional.empty());
+    void sumarioDiarioTudoConcluido() {
+        Tarefa pontual = pontual(true);
+        Tarefa recorrente = recorrente(true);
 
-        assertThatThrownBy(() -> service.fecharSegmentoAberto(tarefa))
-                .isInstanceOf(BusinessException.class);
+        when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
+        when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
+                .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
+
+        DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
+
+        assertThat(r.concluidas()).isEqualTo(r.totalTarefas());
     }
 
     @Test
-    void calcularTempoIncluiSegmentoAberto() {
-        SegmentoTempo fechado = new SegmentoTempo();
-        fechado.setInicio(Instant.now().minusSeconds(60));
-        fechado.setFim(Instant.now());
+    void sumarioDiarioSemTarefasRetornaZeros() {
+        when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of());
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of());
 
-        SegmentoTempo aberto = new SegmentoTempo();
-        aberto.setInicio(Instant.now().minusSeconds(10));
+        DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
 
-        when(repo.findByTarefaId(tarefaId)).thenReturn(List.of(fechado, aberto));
+        assertThat(r.totalTarefas()).isZero();
+        assertThat(r.concluidas()).isZero();
+        assertThat(r.recorrentes()).isEmpty();
+        assertThat(r.pontuais()).isEmpty();
+    }
 
-        long total = service.calcularTempoTotalSegundos(tarefaId);
+    private Tarefa pontual(boolean concluida) {
+        Tarefa t = new Tarefa();
+        t.setNome("Pontual");
+        t.setTipo(TipoTarefa.PONTUAL);
+        t.setConcluida(concluida);
+        return t;
+    }
 
-        // fechado ~60s + aberto ~10s = ~70s
-        assertThat(total).isGreaterThanOrEqualTo(69).isLessThanOrEqualTo(72);
+    private Tarefa recorrente(boolean concluida) {
+        Tarefa t = new Tarefa();
+        t.setNome("Rec");
+        t.setTipo(TipoTarefa.RECORRENTE);
+        t.setDiasSemana("TER,SEX");
+        try {
+            var f = Tarefa.class.getDeclaredField("id");
+            f.setAccessible(true);
+            f.set(t, UUID.randomUUID());
+        } catch (Exception ignored) {}
+        return t;
     }
 }

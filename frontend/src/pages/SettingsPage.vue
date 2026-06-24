@@ -1,26 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAuthStore } from '../stores/authStore'
-import { useWorkspaceStore } from '../stores/workspaceStore'
 
 const router = useRouter()
 const settings = useSettingsStore()
 const authStore = useAuthStore()
-const wsStore = useWorkspaceStore()
 
-const pendingDeleteId = ref<string | null>(null)
-
-function solicitarDelecao(id: string) {
-  pendingDeleteId.value = id
-}
-
-async function confirmarDelecao() {
-  if (!pendingDeleteId.value) return
-  await wsStore.deletar(pendingDeleteId.value)
-  pendingDeleteId.value = null
-}
+type Tema = 'claro' | 'escuro' | 'sistema'
+const TEMAS: { value: Tema; label: string }[] = [
+  { value: 'claro', label: 'Claro' },
+  { value: 'escuro', label: 'Escuro' },
+  { value: 'sistema', label: 'Sistema' },
+]
 
 function sair() {
   authStore.logout()
@@ -29,7 +21,7 @@ function sair() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-feitu-bg dark:bg-night-bg flex flex-col max-w-lg mx-auto">
+  <div class="min-h-screen bg-feitu-bg dark:bg-night-bg flex flex-col max-w-[512px] mx-auto">
 
     <!-- Header -->
     <header class="flex items-center gap-3 px-4 pt-5 pb-4">
@@ -37,7 +29,7 @@ function sair() {
         @click="router.back()"
         class="w-[38px] h-[38px] flex items-center justify-center rounded-[12px] border border-[rgba(54,51,46,.1)] dark:border-[rgba(255,255,255,.06)] bg-white dark:bg-night-surface text-feitu-text/60 dark:text-night-text/60 hover:text-feitu-text dark:hover:text-night-text transition"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
@@ -46,114 +38,63 @@ function sair() {
 
     <div class="flex-1 overflow-y-auto px-4 pb-8 space-y-3">
 
-      <!-- Preferências -->
-      <div class="bg-white dark:bg-night-surface rounded-[18px] overflow-hidden">
-        <div class="px-5 py-4 border-b border-[rgba(54,51,46,.06)] dark:border-[rgba(255,255,255,.05)]">
-          <p class="text-[11.5px] font-semibold text-[#9A9388] uppercase tracking-[.05em]">Preferências</p>
-        </div>
-
-        <!-- Modo noturno -->
-        <div class="flex items-center justify-between px-5 py-4">
-          <div>
-            <p class="text-[14px] font-medium text-feitu-text dark:text-night-text">Modo noturno</p>
-            <p class="text-[12px] text-[#9A9388] mt-[2px]">Tema escuro para o app</p>
-          </div>
+      <!-- Tema -->
+      <div class="bg-white dark:bg-night-surface rounded-[18px] p-5">
+        <p class="text-[11.5px] font-semibold text-[#9A9388] uppercase tracking-[.05em] mb-3">Tema</p>
+        <div class="flex bg-feitu-surface dark:bg-night-card rounded-[12px] p-[3px]">
           <button
-            @click="settings.modoNoturno = !settings.modoNoturno"
-            class="relative inline-flex h-[28px] w-[48px] flex-shrink-0 items-center rounded-[16px] transition-colors"
-            :class="settings.modoNoturno ? 'bg-feitu-blue-deep' : 'bg-[#E0DACE] dark:bg-night-text/20'"
-          >
-            <span
-              class="inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow transition-transform"
-              :class="settings.modoNoturno ? 'translate-x-[24px]' : 'translate-x-[4px]'"
-            />
-          </button>
-        </div>
-
-        <!-- Fuso horário -->
-        <div class="px-5 py-4 border-t border-[rgba(54,51,46,.06)] dark:border-[rgba(255,255,255,.05)]">
-          <p class="text-[14px] font-medium text-feitu-text dark:text-night-text mb-1">Fuso horário</p>
-          <p class="text-[12px] text-[#9A9388] mb-3">Define o horário base do app</p>
-          <div class="flex gap-2">
-            <button
-              @click="settings.fusoHorario = 'BR'"
-              class="flex-1 py-[9px] px-3 rounded-[11px] text-[13px] font-medium transition"
-              :class="settings.fusoHorario === 'BR'
-                ? 'bg-feitu-blue-deep text-white shadow-sm'
-                : 'bg-[#F0EDE6] dark:bg-night-card text-[#8C857B] hover:bg-[#E8E3D8]'"
-            >Brasil (GMT-3)</button>
-            <button
-              @click="settings.fusoHorario = 'UTC'"
-              class="flex-1 py-[9px] px-3 rounded-[11px] text-[13px] font-medium transition"
-              :class="settings.fusoHorario === 'UTC'
-                ? 'bg-feitu-blue-deep text-white shadow-sm'
-                : 'bg-[#F0EDE6] dark:bg-night-card text-[#8C857B] hover:bg-[#E8E3D8]'"
-            >UTC (GMT+0)</button>
-          </div>
+            v-for="t in TEMAS"
+            :key="t.value"
+            @click="settings.tema = t.value"
+            class="flex-1 py-2 rounded-[10px] text-[13px] font-medium transition-all"
+            :class="settings.tema === t.value
+              ? 'bg-white dark:bg-night-surface shadow-sm text-feitu-blue-deep dark:text-feitu-blue'
+              : 'text-[#8C857B] dark:text-night-text/50'"
+          >{{ t.label }}</button>
         </div>
       </div>
 
-      <!-- Workspaces -->
-      <div v-if="wsStore.workspaces.length" class="bg-white dark:bg-night-surface rounded-[18px] overflow-hidden">
-        <div class="px-5 py-4 border-b border-[rgba(54,51,46,.06)] dark:border-[rgba(255,255,255,.05)]">
-          <p class="text-[11.5px] font-semibold text-[#9A9388] uppercase tracking-[.05em]">Workspaces</p>
-        </div>
-
-        <div
-          v-for="(ws, i) in wsStore.workspaces"
-          :key="ws.id"
-          class="flex items-center gap-3 px-5 py-[13px] transition"
-          :class="i > 0 ? 'border-t border-[rgba(54,51,46,.05)] dark:border-[rgba(255,255,255,.04)]' : ''"
-        >
-          <span class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: ws.cor ?? '#A7C7E7' }"/>
-          <span class="flex-1 text-[14px] text-feitu-text dark:text-night-text">{{ ws.nome }}</span>
+      <!-- Fuso horário -->
+      <div class="bg-white dark:bg-night-surface rounded-[18px] p-5">
+        <p class="text-[11.5px] font-semibold text-[#9A9388] uppercase tracking-[.05em] mb-1">Fuso horário</p>
+        <p class="text-[12px] text-[#9A9388] mb-3">Define o horário base do app</p>
+        <div class="flex gap-2">
           <button
-            @click="solicitarDelecao(ws.id)"
-            class="w-[28px] h-[28px] flex items-center justify-center rounded-[8px] text-[#B0A89B] hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-            title="Deletar workspace"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-            </svg>
-          </button>
+            @click="settings.fusoHorario = 'BR'"
+            class="flex-1 py-[9px] px-3 rounded-[11px] text-[13px] font-medium transition"
+            :class="settings.fusoHorario === 'BR'
+              ? 'bg-feitu-blue-deep text-white shadow-sm'
+              : 'bg-[#F0EDE6] dark:bg-night-card text-[#8C857B]'"
+          >Brasil (GMT-3)</button>
+          <button
+            @click="settings.fusoHorario = 'UTC'"
+            class="flex-1 py-[9px] px-3 rounded-[11px] text-[13px] font-medium transition"
+            :class="settings.fusoHorario === 'UTC'
+              ? 'bg-feitu-blue-deep text-white shadow-sm'
+              : 'bg-[#F0EDE6] dark:bg-night-card text-[#8C857B]'"
+          >UTC (GMT+0)</button>
         </div>
       </div>
 
-      <!-- Sair -->
+      <!-- Conta -->
       <div class="bg-white dark:bg-night-surface rounded-[18px] overflow-hidden">
+        <div class="px-5 py-4 border-b border-[rgba(54,51,46,.06)] dark:border-[rgba(255,255,255,.05)]">
+          <p class="text-[11.5px] font-semibold text-[#9A9388] uppercase tracking-[.05em]">Conta</p>
+        </div>
+        <div class="flex items-center gap-3 px-5 py-4">
+          <div class="w-10 h-10 rounded-full bg-feitu-blue flex items-center justify-center flex-shrink-0">
+            <span class="text-[16px] font-semibold text-feitu-blue-deep">
+              {{ authStore.email?.[0]?.toUpperCase() ?? '?' }}
+            </span>
+          </div>
+          <p class="text-[13.5px] text-[#6E6A62] dark:text-night-text/60 truncate">{{ authStore.email }}</p>
+        </div>
         <button
           @click="sair"
-          class="w-full px-5 py-[15px] text-[14px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/15 transition text-left"
-        >
-          Sair da conta
-        </button>
+          class="w-full px-5 py-[14px] text-[14px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/15 transition text-left border-t border-[rgba(54,51,46,.06)] dark:border-[rgba(255,255,255,.05)]"
+        >Sair da conta</button>
       </div>
 
     </div>
   </div>
-
-  <!-- Workspace delete confirmation -->
-  <Teleport to="body">
-    <div v-if="pendingDeleteId" class="fixed inset-0 z-30 flex items-end">
-      <div class="absolute inset-0 bg-black/25 dark:bg-black/50" @click="pendingDeleteId = null"/>
-      <div class="relative w-full max-w-lg mx-auto bg-white dark:bg-night-surface rounded-t-[28px] p-5 pb-8 shadow-xl">
-        <div class="w-10 h-1 rounded-full bg-[#DDD8CE] mx-auto mb-4"/>
-        <p class="text-[15px] font-semibold text-feitu-text dark:text-night-text mb-1">Excluir workspace</p>
-        <p class="text-[13px] text-[#8C857B] mb-5">
-          Tem certeza que deseja excluir "{{ wsStore.workspaces.find(w => w.id === pendingDeleteId)?.nome }}"?
-          Todas as tarefas e registros de tempo serão removidos.
-        </p>
-        <div class="flex gap-2">
-          <button
-            @click="pendingDeleteId = null"
-            class="flex-1 py-[10px] rounded-[12px] border border-[rgba(54,51,46,.1)] text-[#8C857B] text-[13.5px] font-medium"
-          >Cancelar</button>
-          <button
-            @click="confirmarDelecao"
-            class="flex-1 py-[10px] rounded-[12px] bg-red-500 text-white text-[13.5px] font-semibold"
-          >Excluir</button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
 </template>
