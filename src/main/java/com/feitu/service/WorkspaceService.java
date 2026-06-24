@@ -5,7 +5,7 @@ import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
-import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.repository.ConclusaoRecorrenteRepository;
 import com.feitu.repository.TarefaRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.repository.WorkspaceRepository;
@@ -23,14 +23,14 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UsuarioRepository usuarioRepository;
     private final TarefaRepository tarefaRepository;
-    private final SegmentoTempoRepository segmentoTempoRepository;
+    private final ConclusaoRecorrenteRepository conclusaoRepository;
 
     public WorkspaceService(WorkspaceRepository workspaceRepository, UsuarioRepository usuarioRepository,
-                            TarefaRepository tarefaRepository, SegmentoTempoRepository segmentoTempoRepository) {
+                            TarefaRepository tarefaRepository, ConclusaoRecorrenteRepository conclusaoRepository) {
         this.workspaceRepository = workspaceRepository;
         this.usuarioRepository = usuarioRepository;
         this.tarefaRepository = tarefaRepository;
-        this.segmentoTempoRepository = segmentoTempoRepository;
+        this.conclusaoRepository = conclusaoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +75,7 @@ public class WorkspaceService {
         Workspace ws = buscarDoUsuario(id, usuarioId);
         List<Tarefa> tarefas = tarefaRepository.findByWorkspaceId(id);
         for (Tarefa tarefa : tarefas) {
-            segmentoTempoRepository.deleteByTarefaId(tarefa.getId());
+            conclusaoRepository.deleteByTarefaId(tarefa.getId());
         }
         tarefaRepository.deleteAll(tarefas);
         workspaceRepository.delete(ws);

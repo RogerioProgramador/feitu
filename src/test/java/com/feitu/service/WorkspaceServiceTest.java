@@ -5,7 +5,7 @@ import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
-import com.feitu.repository.SegmentoTempoRepository;
+import com.feitu.repository.ConclusaoRecorrenteRepository;
 import com.feitu.repository.TarefaRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.repository.WorkspaceRepository;
@@ -32,7 +32,7 @@ class WorkspaceServiceTest {
     @Mock WorkspaceRepository workspaceRepository;
     @Mock UsuarioRepository usuarioRepository;
     @Mock TarefaRepository tarefaRepository;
-    @Mock SegmentoTempoRepository segmentoTempoRepository;
+    @Mock ConclusaoRecorrenteRepository conclusaoRepository;
     @InjectMocks WorkspaceService service;
 
     UUID usuarioId = UUID.randomUUID();
@@ -73,7 +73,7 @@ class WorkspaceServiceTest {
     }
 
     @Test
-    void deletarWorkspaceDeletaSegmentosETarefasEmCascata() {
+    void deletarWorkspaceDeletaConclussesETarefasEmCascata() {
         UUID wsId = UUID.randomUUID();
         Workspace ws = new Workspace();
         ws.setNome("WS");
@@ -86,7 +86,7 @@ class WorkspaceServiceTest {
 
         service.deletar(wsId, usuarioId);
 
-        verify(segmentoTempoRepository).deleteByTarefaId(any());
+        verify(conclusaoRepository).deleteByTarefaId(any());
         verify(tarefaRepository).deleteAll(List.of(tarefa));
         verify(workspaceRepository).delete(ws);
     }
