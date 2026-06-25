@@ -2,7 +2,6 @@ package com.feitu.service;
 
 import com.feitu.config.BusinessException;
 import com.feitu.config.ResourceNotFoundException;
-import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
@@ -15,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -65,24 +66,20 @@ public class WorkspaceService {
 
     public void reordenar(UUID usuarioId, List<UUID> novaOrdem) {
         List<Workspace> workspaces = workspaceRepository.findByUsuarioIdOrderByOrdem(usuarioId);
+        Map<UUID, Workspace> byId = workspaces.stream()
+                .collect(Collectors.toMap(Workspace::getId, w -> w));
         for (int i = 0; i < novaOrdem.size(); i++) {
-            UUID id = novaOrdem.get(i);
-            workspaces.stream()
-                    .filter(ws -> ws.getId().equals(id))
-                    .findFirst()
-                    .ifPresent(ws -> ws.setOrdem(novaOrdem.indexOf(id) + 1));
+            Workspace ws = byId.get(novaOrdem.get(i));
+            if (ws != null) ws.setOrdem(i + 1);
         }
         workspaceRepository.saveAll(workspaces);
     }
 
     public void deletar(UUID id, UUID usuarioId) {
-        Workspace ws = buscarDoUsuario(id, usuarioId);
-        List<Tarefa> tarefas = tarefaRepository.findByWorkspaceId(id);
-        for (Tarefa tarefa : tarefas) {
-            conclusaoRepository.deleteByTarefaId(tarefa.getId());
-        }
-        tarefaRepository.deleteAll(tarefas);
-        workspaceRepository.delete(ws);
+        buscarDoUsuario(id, usuarioId);
+        conclusaoRepository.deleteByWorkspaceId(id);
+        tarefaRepository.deleteByWorkspaceId(id);
+        workspaceRepository.deleteById(id);
     }
 
     private Workspace buscarDoUsuario(UUID id, UUID usuarioId) {

@@ -2,7 +2,7 @@ package com.feitu.controller;
 
 import com.feitu.dto.NotificacaoConfigRequest;
 import com.feitu.dto.UsuarioResponse;
-import com.feitu.repository.UsuarioRepository;
+import com.feitu.security.AuthUtils;
 import com.feitu.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,11 +17,11 @@ import java.util.UUID;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtils authUtils;
 
-    public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public UsuarioController(UsuarioService usuarioService, AuthUtils authUtils) {
         this.usuarioService = usuarioService;
-        this.usuarioRepository = usuarioRepository;
+        this.authUtils = authUtils;
     }
 
     @GetMapping("/me")
@@ -38,6 +38,6 @@ public class UsuarioController {
     }
 
     private UUID usuarioId(UserDetails principal) {
-        return usuarioRepository.findByEmail(principal.getUsername()).orElseThrow().getId();
+        return authUtils.usuarioId(principal);
     }
 }

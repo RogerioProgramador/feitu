@@ -46,3 +46,6 @@ specification-to-design
 
 # Dependências (raiz)
 node_modules/
+
+# Skills locais (Claude Code)
+.claude/commands/

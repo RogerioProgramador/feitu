@@ -3,7 +3,7 @@ package com.feitu.controller;
 import com.feitu.dto.ReorderRequest;
 import com.feitu.dto.WorkspaceRequest;
 import com.feitu.dto.WorkspaceResponse;
-import com.feitu.repository.UsuarioRepository;
+import com.feitu.security.AuthUtils;
 import com.feitu.service.WorkspaceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,11 +19,11 @@ import java.util.UUID;
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtils authUtils;
 
-    public WorkspaceController(WorkspaceService workspaceService, UsuarioRepository usuarioRepository) {
+    public WorkspaceController(WorkspaceService workspaceService, AuthUtils authUtils) {
         this.workspaceService = workspaceService;
-        this.usuarioRepository = usuarioRepository;
+        this.authUtils = authUtils;
     }
 
     @GetMapping
@@ -63,7 +63,6 @@ public class WorkspaceController {
     }
 
     private UUID usuarioId(UserDetails principal) {
-        return usuarioRepository.findByEmail(principal.getUsername())
-                .orElseThrow().getId();
+        return authUtils.usuarioId(principal);
     }
 }

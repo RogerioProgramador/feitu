@@ -2,7 +2,7 @@ package com.feitu.controller;
 
 import com.feitu.dto.SubscribeRequest;
 import com.feitu.dto.UnsubscribeRequest;
-import com.feitu.repository.UsuarioRepository;
+import com.feitu.security.AuthUtils;
 import com.feitu.service.PushSubscriptionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,11 +17,11 @@ import java.util.UUID;
 public class PushController {
 
     private final PushSubscriptionService pushSubscriptionService;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtils authUtils;
 
-    public PushController(PushSubscriptionService pushSubscriptionService, UsuarioRepository usuarioRepository) {
+    public PushController(PushSubscriptionService pushSubscriptionService, AuthUtils authUtils) {
         this.pushSubscriptionService = pushSubscriptionService;
-        this.usuarioRepository = usuarioRepository;
+        this.authUtils = authUtils;
     }
 
     @PostMapping("/subscribe")
@@ -41,6 +41,6 @@ public class PushController {
     }
 
     private UUID usuarioId(UserDetails principal) {
-        return usuarioRepository.findByEmail(principal.getUsername()).orElseThrow().getId();
+        return authUtils.usuarioId(principal);
     }
 }

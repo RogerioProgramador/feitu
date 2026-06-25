@@ -15,6 +15,8 @@ public interface TarefaRepository extends JpaRepository<Tarefa, UUID> {
 
     List<Tarefa> findByWorkspaceId(UUID workspaceId);
 
+    void deleteByWorkspaceId(UUID workspaceId);
+
     List<Tarefa> findByWorkspaceIdAndTipo(UUID workspaceId, TipoTarefa tipo);
 
     List<Tarefa> findByWorkspaceIdAndData(UUID workspaceId, LocalDate data);

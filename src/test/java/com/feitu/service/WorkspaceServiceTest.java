@@ -2,7 +2,6 @@ package com.feitu.service;
 
 import com.feitu.config.BusinessException;
 import com.feitu.config.ResourceNotFoundException;
-import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
 import com.feitu.domain.Workspace;
 import com.feitu.dto.WorkspaceRequest;
@@ -79,17 +78,13 @@ class WorkspaceServiceTest {
         Workspace ws = new Workspace();
         ws.setNome("WS");
 
-        Tarefa tarefa = new Tarefa();
-        UUID tarefaId = UUID.randomUUID();
-
         when(workspaceRepository.findByIdAndUsuarioId(wsId, usuarioId)).thenReturn(Optional.of(ws));
-        when(tarefaRepository.findByWorkspaceId(wsId)).thenReturn(List.of(tarefa));
 
         service.deletar(wsId, usuarioId);
 
-        verify(conclusaoRepository).deleteByTarefaId(any());
-        verify(tarefaRepository).deleteAll(List.of(tarefa));
-        verify(workspaceRepository).delete(ws);
+        verify(conclusaoRepository).deleteByWorkspaceId(wsId);
+        verify(tarefaRepository).deleteByWorkspaceId(wsId);
+        verify(workspaceRepository).deleteById(wsId);
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.feitu.notification;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feitu.domain.PushSubscription;
 import com.feitu.domain.Usuario;
 import com.feitu.repository.PushSubscriptionRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Security;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PushNotificationService {
@@ -20,16 +23,19 @@ public class PushNotificationService {
     private static final Logger log = LoggerFactory.getLogger(PushNotificationService.class);
 
     private final PushSubscriptionRepository subscriptionRepository;
+    private final ObjectMapper objectMapper;
     private final PushService pushService;
     private final boolean enabled;
 
     public PushNotificationService(
             PushSubscriptionRepository subscriptionRepository,
+            ObjectMapper objectMapper,
             @Value("${push.vapid.public-key}") String publicKey,
             @Value("${push.vapid.private-key}") String privateKey,
             @Value("${push.vapid.subject}") String subject) {
 
         this.subscriptionRepository = subscriptionRepository;
+        this.objectMapper = objectMapper;
 
         if (publicKey.isBlank() || privateKey.isBlank()) {
             log.warn("VAPID keys not configured — push notifications disabled");
@@ -50,7 +56,13 @@ public class PushNotificationService {
     public void enviar(PushSubscription subscription, String titulo, String corpo) {
         if (!enabled) return;
 
-        String payload = "{\"title\":\"" + titulo + "\",\"body\":\"" + corpo + "\"}";
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(Map.of("title", titulo, "body", corpo));
+        } catch (JsonProcessingException e) {
+            log.error("Erro ao serializar payload push: {}", e.getMessage());
+            return;
+        }
         try {
             nl.martijndwars.webpush.Subscription sub = new nl.martijndwars.webpush.Subscription(
                     subscription.getEndpoint(),

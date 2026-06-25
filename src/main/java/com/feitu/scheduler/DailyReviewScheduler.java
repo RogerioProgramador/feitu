@@ -30,12 +30,9 @@ public class DailyReviewScheduler {
         LocalTime agora = LocalTime.now().withSecond(0).withNano(0);
         LocalDate hoje = LocalDate.now();
 
-        List<Usuario> usuarios = usuarioRepository.findAll();
+        List<Usuario> usuarios = usuarioRepository.findByHorarioNotificacao(agora);
         for (Usuario usuario : usuarios) {
-            LocalTime horario = usuario.getHorarioNotificacao();
-            if (horario == null) continue;
-            if (!horario.equals(agora)) continue;
-            if (hoje.equals(usuario.getUltimaNotificacaoEm())) continue;
+            if (!deveEnviar(usuario, agora, hoje)) continue;
 
             pushService.enviarParaUsuario(
                     usuario,
@@ -53,7 +50,6 @@ public class DailyReviewScheduler {
         LocalTime horario = usuario.getHorarioNotificacao();
         if (horario == null) return false;
         if (!horario.equals(agora)) return false;
-        if (hoje.equals(usuario.getUltimaNotificacaoEm())) return false;
-        return true;
+        return !hoje.equals(usuario.getUltimaNotificacaoEm());
     }
 }

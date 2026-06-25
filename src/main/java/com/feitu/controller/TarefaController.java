@@ -4,7 +4,7 @@ import com.feitu.dto.RenomearRequest;
 import com.feitu.dto.TarefaDescricaoRequest;
 import com.feitu.dto.TarefaRequest;
 import com.feitu.dto.TarefaResponse;
-import com.feitu.repository.UsuarioRepository;
+import com.feitu.security.AuthUtils;
 import com.feitu.service.TarefaService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,11 +21,11 @@ import java.util.UUID;
 public class TarefaController {
 
     private final TarefaService tarefaService;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtils authUtils;
 
-    public TarefaController(TarefaService tarefaService, UsuarioRepository usuarioRepository) {
+    public TarefaController(TarefaService tarefaService, AuthUtils authUtils) {
         this.tarefaService = tarefaService;
-        this.usuarioRepository = usuarioRepository;
+        this.authUtils = authUtils;
     }
 
     @GetMapping("/api/workspaces/{workspaceId}/tarefas")
@@ -89,6 +89,6 @@ public class TarefaController {
     }
 
     private UUID usuarioId(UserDetails principal) {
-        return usuarioRepository.findByEmail(principal.getUsername()).orElseThrow().getId();
+        return authUtils.usuarioId(principal);
     }
 }

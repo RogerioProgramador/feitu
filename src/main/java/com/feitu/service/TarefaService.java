@@ -54,30 +54,11 @@ public class TarefaService {
     @Transactional(readOnly = true)
     public List<TarefaResponse> listarParaDia(UUID workspaceId, UUID usuarioId, LocalDate date) {
         buscarWorkspaceDoUsuario(workspaceId, usuarioId);
-
-        List<Tarefa> pontuais = tarefaRepository.findByWorkspaceIdAndData(workspaceId, date);
-
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
+        List<Tarefa> pontuais = tarefaRepository.findByWorkspaceIdAndData(workspaceId, date);
         List<Tarefa> recorrentes = tarefaRepository.findRecorrentesParaDia(workspaceId, diaSemana)
                 .stream().filter(t -> !dataCriacaoLocalBrasil(t).isAfter(date)).toList();
-
-        // Buscar conclusões das recorrentes em batch para evitar N+1
-        Set<UUID> idsRecorrentes = recorrentes.stream().map(Tarefa::getId).collect(Collectors.toSet());
-        Set<UUID> concluidasHoje = idsRecorrentes.isEmpty() ? Set.of() :
-                recorrentes.stream()
-                        .filter(t -> conclusaoRepository.findByTarefaIdAndData(t.getId(), date).isPresent())
-                        .map(Tarefa::getId)
-                        .collect(Collectors.toSet());
-
-        List<TarefaResponse> result = new java.util.ArrayList<>();
-        recorrentes.stream()
-                .map(t -> TarefaResponse.from(t, concluidasHoje.contains(t.getId())))
-                .forEach(result::add);
-        pontuais.stream()
-                .map(TarefaResponse::fromPontual)
-                .forEach(result::add);
-
-        return result;
+        return montarRespostas(pontuais, recorrentes, date);
     }
 
     public TarefaResponse criar(UUID workspaceId, UUID usuarioId, TarefaRequest req, LocalDate date) {
@@ -177,24 +158,21 @@ public class TarefaService {
     /** Utilitário usado por AnalyticsService */
     public List<TarefaResponse> listarParaDiaDoUsuario(UUID usuarioId, LocalDate date) {
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
-
         List<Tarefa> pontuais = tarefaRepository.findPontuaisDoUsuarioParaData(usuarioId, date);
         List<Tarefa> recorrentes = tarefaRepository.findRecorrentesDoUsuarioParaDia(usuarioId, diaSemana)
                 .stream().filter(t -> !dataCriacaoLocalBrasil(t).isAfter(date)).toList();
+        return montarRespostas(pontuais, recorrentes, date);
+    }
 
-        Set<UUID> concluidasHoje = recorrentes.stream()
-                .filter(t -> conclusaoRepository.findByTarefaIdAndData(t.getId(), date).isPresent())
-                .map(Tarefa::getId)
-                .collect(Collectors.toSet());
+    private List<TarefaResponse> montarRespostas(List<Tarefa> pontuais, List<Tarefa> recorrentes, LocalDate date) {
+        Set<UUID> idsRecorrentes = recorrentes.stream().map(Tarefa::getId).collect(Collectors.toSet());
+        Set<UUID> concluidasHoje = idsRecorrentes.isEmpty()
+                ? Set.of()
+                : conclusaoRepository.findTarefaIdsConcluidasByIds(idsRecorrentes, date);
 
         List<TarefaResponse> result = new java.util.ArrayList<>();
-        recorrentes.stream()
-                .map(t -> TarefaResponse.from(t, concluidasHoje.contains(t.getId())))
-                .forEach(result::add);
-        pontuais.stream()
-                .map(TarefaResponse::fromPontual)
-                .forEach(result::add);
-
+        recorrentes.forEach(t -> result.add(TarefaResponse.from(t, concluidasHoje.contains(t.getId()))));
+        pontuais.forEach(t -> result.add(TarefaResponse.fromPontual(t)));
         return result;
     }
 }
