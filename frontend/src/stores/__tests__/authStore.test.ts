@@ -78,6 +78,23 @@ describe('authStore', () => {
     expect(store.horarioNotificacao).toBeNull()
   })
 
+  it('register armazena token e email', async () => {
+    vi.mocked(http.post).mockResolvedValue({ data: { token: 'tok-reg' } })
+
+    const store = useAuthStore()
+    await store.register('novo@test.com', 'senha123', 'FEITU-XYZ')
+
+    expect(store.token).toBe('tok-reg')
+    expect(store.email).toBe('novo@test.com')
+    expect(store.isAuthenticated).toBe(true)
+    expect(storageMock.getItem('feitu_token')).toBe('tok-reg')
+    expect(http.post).toHaveBeenCalledWith('/auth/register', {
+      email: 'novo@test.com',
+      senha: 'senha123',
+      codigoConvite: 'FEITU-XYZ',
+    })
+  })
+
   it('carregarPerfil mantém horarioNotificacao null quando perfil não tem horário', async () => {
     vi.mocked(usuarioApi.me).mockResolvedValue({
       id: 'uid-1',

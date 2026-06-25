@@ -16,10 +16,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -163,11 +166,61 @@ class TarefaServiceTest {
         LocalDate terca = LocalDate.of(2026, 6, 23); // terça-feira
         when(tarefaRepository.findByWorkspaceIdAndData(wsId, terca)).thenReturn(List.of(pontual));
         when(tarefaRepository.findRecorrentesParaDia(wsId, "TER")).thenReturn(List.of(recorrente));
-        when(conclusaoRepository.findByTarefaIdAndData(any(), eq(terca))).thenReturn(Optional.empty());
+        when(conclusaoRepository.findTarefaIdsConcluidasByIds(Set.of(tId), terca)).thenReturn(Set.of());
 
         List<TarefaResponse> result = service.listarParaDia(wsId, uid, terca);
 
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void listarParaDiaExcluiRecorrenteCriadaAposData() {
+        when(workspaceRepository.findByIdAndUsuarioId(wsId, uid)).thenReturn(Optional.of(workspace));
+        LocalDate terca = LocalDate.of(2026, 6, 23);
+
+        Tarefa futura = tarefaRecorrente();
+        // criadoEm amanhã ao meio-dia UTC → dataCriacaoLocalBrasil = amanhã → filtrada
+        ReflectionTestUtils.setField(futura, "criadoEm", LocalDateTime.of(2026, 6, 24, 12, 0));
+
+        when(tarefaRepository.findByWorkspaceIdAndData(wsId, terca)).thenReturn(List.of());
+        when(tarefaRepository.findRecorrentesParaDia(wsId, "TER")).thenReturn(List.of(futura));
+
+        List<TarefaResponse> result = service.listarParaDia(wsId, uid, terca);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void renomearAtualizaNomeDaTarefa() {
+        Tarefa t = tarefaPontual();
+        when(tarefaRepository.findByIdAndWorkspaceUsuarioId(tId, uid)).thenReturn(Optional.of(t));
+
+        service.renomear(tId, uid, "Novo nome");
+
+        assertThat(t.getNome()).isEqualTo("Novo nome");
+        verify(tarefaRepository).save(t);
+    }
+
+    @Test
+    void atualizarDescricaoSalvaDescricao() {
+        Tarefa t = tarefaPontual();
+        when(tarefaRepository.findByIdAndWorkspaceUsuarioId(tId, uid)).thenReturn(Optional.of(t));
+
+        service.atualizarDescricao(tId, uid, "nova desc");
+
+        assertThat(t.getDescricao()).isEqualTo("nova desc");
+        verify(tarefaRepository).save(t);
+    }
+
+    @Test
+    void deletarRemoveConclussesETarefa() {
+        Tarefa t = tarefaPontual();
+        when(tarefaRepository.findByIdAndWorkspaceUsuarioId(tId, uid)).thenReturn(Optional.of(t));
+
+        service.deletar(tId, uid);
+
+        verify(conclusaoRepository).deleteByTarefaId(tId);
+        verify(tarefaRepository).delete(t);
     }
 
     @Test
@@ -185,11 +238,7 @@ class TarefaServiceTest {
         t.setNome("T");
         t.setTipo(TipoTarefa.PONTUAL);
         t.setWorkspace(workspace);
-        try {
-            var f = Tarefa.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(t, tId);
-        } catch (Exception ignored) {}
+        ReflectionTestUtils.setField(t, "id", tId);
         return t;
     }
 
@@ -199,11 +248,7 @@ class TarefaServiceTest {
         t.setTipo(TipoTarefa.RECORRENTE);
         t.setDiasSemana("SEG,QUA,SEX");
         t.setWorkspace(workspace);
-        try {
-            var f = Tarefa.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(t, tId);
-        } catch (Exception ignored) {}
+        ReflectionTestUtils.setField(t, "id", tId);
         return t;
     }
 }
