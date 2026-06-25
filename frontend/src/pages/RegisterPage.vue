@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import { getApiErrorMessage } from '../utils/apiError'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -31,8 +32,8 @@ async function criar() {
   try {
     await auth.register(email.value, senha.value, codigoConvite.value.trim())
     router.replace('/workspaces')
-  } catch (e: any) {
-    erro.value = e.response?.data?.detail ?? 'Erro ao criar conta'
+  } catch (e) {
+    erro.value = getApiErrorMessage(e, 'Erro ao criar conta')
   } finally {
     carregando.value = false
   }

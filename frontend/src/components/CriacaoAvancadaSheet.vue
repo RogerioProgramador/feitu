@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTarefaStore } from '../stores/tarefaStore'
+import { getApiErrorMessage } from '../utils/apiError'
 import type { TipoTarefa } from '../types'
 
 const props = defineProps<{ workspaceId: string; date?: string }>()
@@ -69,8 +70,8 @@ async function criar() {
       props.date,
     )
     emit('criada')
-  } catch (e: any) {
-    erro.value = e.response?.data?.detail ?? 'Erro ao criar tarefa'
+  } catch (e) {
+    erro.value = getApiErrorMessage(e, 'Erro ao criar tarefa')
   } finally {
     salvando.value = false
   }

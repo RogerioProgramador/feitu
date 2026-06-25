@@ -4,14 +4,14 @@ import { useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAuthStore } from '../stores/authStore'
 import { useWorkspaceStore } from '../stores/workspaceStore'
-import { usuarioApi } from '../api/usuarioApi'
 
 const router = useRouter()
 const settings = useSettingsStore()
 const authStore = useAuthStore()
 const wsStore = useWorkspaceStore()
 
-type Tema = 'claro' | 'escuro' | 'sistema'
+import type { Tema } from '../types'
+
 const TEMAS: { value: Tema; label: string }[] = [
   { value: 'claro', label: 'Claro' },
   { value: 'escuro', label: 'Escuro' },
@@ -19,7 +19,6 @@ const TEMAS: { value: Tema; label: string }[] = [
 ]
 
 const fusoOpen = ref(false)
-const horarioNotificacao = ref<string | null>(null)
 const criandoWs = ref(false)
 const nomeNovoWs = ref('')
 const confirmandoDeletar = ref<string | null>(null)
@@ -58,14 +57,7 @@ async function deletarWs(id: string) {
 
 onMounted(async () => {
   if (!wsStore.workspaces.length) await wsStore.carregar()
-  try {
-    const perfil = await usuarioApi.me()
-    if (perfil.horarioNotificacao) {
-      horarioNotificacao.value = perfil.horarioNotificacao.slice(0, 5)
-    }
-  } catch {
-    // sem notificação configurada
-  }
+  await authStore.carregarPerfil()
 })
 
 function sair() {
@@ -231,7 +223,7 @@ function sair() {
         style="padding: 14px 16px;"
       >
         <span style="font: 500 15px 'Space Grotesk'; color: #36332E;" class="dark:text-night-text">Lembrete do dia</span>
-        <span style="font: 600 16px 'Space Grotesk'; color: #5E8BB6;">{{ horarioNotificacao ?? '08:00' }}</span>
+        <span style="font: 600 16px 'Space Grotesk'; color: #5E8BB6;">{{ authStore.horarioNotificacao ?? '08:00' }}</span>
       </div>
 
       <!-- CONTA -->

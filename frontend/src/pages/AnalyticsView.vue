@@ -1,27 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { analyticsApi } from '../api/analyticsApi'
+import { storeToRefs } from 'pinia'
+import { useAnalyticsStore } from '../stores/analyticsStore'
 import { hojeISO } from '../utils/formatarData'
-import type { DailySummary } from '../types'
 
+const analyticsStore = useAnalyticsStore()
 const data = ref(hojeISO())
-const resumo = ref<DailySummary | null>(null)
-const carregando = ref(false)
-const erro = ref('')
 
-async function carregar() {
-  carregando.value = true
-  erro.value = ''
-  try {
-    resumo.value = await analyticsApi.diario(data.value)
-  } catch {
-    erro.value = 'Erro ao carregar resumo'
-  } finally {
-    carregando.value = false
-  }
-}
+const { resumo, carregando, erro } = storeToRefs(analyticsStore)
 
-onMounted(carregar)
+onMounted(() => analyticsStore.carregar(data.value))
 
 const estado = computed<'vazio' | 'parcial' | 'tudo'>(() => {
   if (!resumo.value || resumo.value.totalTarefas === 0) return 'vazio'
@@ -38,7 +26,7 @@ function anteriorDia() {
   const d = new Date(data.value + 'T12:00:00')
   d.setDate(d.getDate() - 1)
   data.value = d.toISOString().slice(0, 10)
-  carregar()
+  analyticsStore.carregar(data.value)
 }
 
 function proximoDia() {
@@ -46,7 +34,7 @@ function proximoDia() {
   const d = new Date(data.value + 'T12:00:00')
   d.setDate(d.getDate() + 1)
   data.value = d.toISOString().slice(0, 10)
-  carregar()
+  analyticsStore.carregar(data.value)
 }
 
 function navLabel(iso: string): string {

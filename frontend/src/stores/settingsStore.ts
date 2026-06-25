@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-
-type Tema = 'claro' | 'escuro' | 'sistema'
+import type { Tema } from '../types'
 
 export const useSettingsStore = defineStore('settings', () => {
   const tema = ref<Tema>((localStorage.getItem('feitu_tema') as Tema) ?? 'sistema')

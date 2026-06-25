@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import http from '../api/http'
+import { usuarioApi } from '../api/usuarioApi'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('feitu_token'))
   const email = ref<string | null>(localStorage.getItem('feitu_email'))
+  const horarioNotificacao = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
 
@@ -27,9 +29,21 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     token.value = null
     email.value = null
+    horarioNotificacao.value = null
     localStorage.removeItem('feitu_token')
     localStorage.removeItem('feitu_email')
   }
 
-  return { token, email, isAuthenticated, login, register, logout }
+  async function carregarPerfil() {
+    try {
+      const perfil = await usuarioApi.me()
+      if (perfil.horarioNotificacao) {
+        horarioNotificacao.value = perfil.horarioNotificacao.slice(0, 5)
+      }
+    } catch {
+      // sem notificação configurada
+    }
+  }
+
+  return { token, email, horarioNotificacao, isAuthenticated, login, register, logout, carregarPerfil }
 })

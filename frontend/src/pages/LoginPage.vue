@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import { getApiErrorMessage } from '../utils/apiError'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -17,8 +18,8 @@ async function entrar() {
   try {
     await auth.login(email.value, senha.value)
     router.replace('/workspaces')
-  } catch (e: any) {
-    erro.value = e.response?.data?.detail ?? 'Credenciais inválidas'
+  } catch (e) {
+    erro.value = getApiErrorMessage(e, 'Credenciais inválidas')
   } finally {
     carregando.value = false
   }

@@ -1,4 +1,5 @@
 export type TipoTarefa = 'PONTUAL' | 'RECORRENTE'
+export type Tema = 'claro' | 'escuro' | 'sistema'
 
 export interface Workspace {
   id: string
