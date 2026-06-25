@@ -54,7 +54,7 @@ async function criar() {
   erro.value = ''
   try {
     const horario = horarioAtivo.value && tipo.value === 'RECORRENTE'
-      ? `${hora.value.padStart(2, '0')}:${minuto.value.padStart(2, '0')}`
+      ? `${String(hora.value).padStart(2, '0')}:${String(minuto.value).padStart(2, '0')}`
       : null
 
     await store.criar(
