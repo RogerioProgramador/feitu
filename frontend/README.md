@@ -1,5 +1,16 @@
-# Vue 3 + TypeScript + Vite
+# Feitu — Frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Desenvolvimento
+
+```bash
+npm install
+npm run dev        # dev server :5173 (proxy /api → :8080)
+npm run typecheck  # vue-tsc --noEmit
+npm run test       # Vitest
+npm run build      # build de produção (chamado pelo mvn package)
+```
+
+O build de produção é invocado automaticamente pelo Maven durante `mvn package`.
+Para rodar localmente com backend, inicie o backend com `mvn spring-boot:run -P backend-only -Dspring-boot.run.profiles=dev` e então `npm run dev`.

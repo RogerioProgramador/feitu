@@ -18,9 +18,9 @@ export default defineConfig({
         manifest: {
           name: 'Feitu',
           short_name: 'Feitu',
-          description: 'Checklist diário com timer integrado',
-          theme_color: '#F9F6F0',
-          background_color: '#F9F6F0',
+          description: 'Checklist diário de tarefas',
+          theme_color: '#E8E4DC',
+          background_color: '#E8E4DC',
           display: 'standalone',
           start_url: '/',
           icons: [

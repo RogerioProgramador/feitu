@@ -1,14 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#A7C7E7"/>
-      <stop offset="100%" stop-color="#B5EAD7"/>
-    </linearGradient>
-  </defs>
-  <!-- Fundo arredondado com gradiente da paleta do Feitu -->
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- Check principal -->
-  <path d="M128 262 L218 352 L384 160"
-        stroke="white" stroke-width="62"
-        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="512" height="512" rx="96" fill="#F7F4EE"/>
+  <circle cx="256" cy="256" r="164"
+    stroke="#5E8BB6" stroke-width="38"
+    stroke-linecap="round"
+    stroke-dasharray="795 238"
+    fill="none"
+    transform="rotate(-46 256 256)"/>
+  <path d="M174 256 l55 55 l110 -110"
+    stroke="#E07B4F" stroke-width="32"
+    stroke-linecap="round" stroke-linejoin="round"
+    fill="none"/>
 </svg>
