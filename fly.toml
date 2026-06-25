@@ -4,6 +4,9 @@ primary_region = "gru"
 [build]
   dockerfile = "Dockerfile"
 
+[deploy]
+  strategy = "immediate"
+
 [env]
   H2_CONSOLE_ENABLED = "false"
   SPRING_PROFILES_ACTIVE = "prod"
