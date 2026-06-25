@@ -11,7 +11,9 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
+    // Não redireciona em rotas de autenticação (ex: login inválido deve mostrar erro local)
+    const isAuthRoute = error.config?.url?.startsWith('/auth/')
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('feitu_token')
       localStorage.removeItem('feitu_email')
       window.location.href = '/login'

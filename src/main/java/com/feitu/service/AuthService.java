@@ -10,6 +10,7 @@ import com.feitu.repository.InviteCodeRepository;
 import com.feitu.repository.UsuarioRepository;
 import com.feitu.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -63,8 +64,14 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.senha()));
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.email(), req.senha()));
+        } catch (BadCredentialsException ex) {
+            // Relança como BusinessException para evitar que ExceptionTranslationFilter
+            // intercepte BadCredentialsException antes do @RestControllerAdvice
+            throw new BusinessException("Credenciais inválidas");
+        }
         UserDetails userDetails = userDetailsService.loadUserByUsername(req.email());
         return new AuthResponse(jwtService.generateToken(userDetails));
     }
