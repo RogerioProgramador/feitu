@@ -140,8 +140,11 @@ flyctl volumes create feitu_data --region gru --size 1</pre>
         <pre>flyctl secrets set \
   JWT_SECRET="sua-string-aleatoria-com-minimo-32-chars" \
   VAPID_PUBLIC_KEY="coloque-a-public-key-aqui" \
-  VAPID_PRIVATE_KEY="coloque-a-private-key-aqui"</pre>
+  VAPID_PRIVATE_KEY="coloque-a-private-key-aqui" \
+  DB_PATH="./data/feitu"</pre>
       </div>
+
+      <p><code>DB_PATH</code> define o caminho do arquivo H2 sem extensão (padrão: <code>./data/feitu</code> → cria <code>/data/feitu.mv.db</code> no volume). Para resetar o banco em produção, aponte para um novo caminho: <code>flyctl secrets set DB_PATH=./data/feitu2</code>.</p>
 
       <p>Para gerar o <code>JWT_SECRET</code> no PowerShell:</p>
 

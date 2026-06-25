@@ -197,19 +197,22 @@
           <span class="ep-path">/api/workspaces/{workspaceId}/tarefas</span>
         </div>
         <div class="ep-body">
-          <p>Lista todas as tarefas do workspace (qualquer estado).</p>
+          <p>Lista as tarefas do dia para o workspace. Query param <code>date=YYYY-MM-DD</code> (opcional, padrão: hoje em UTC-3). Retorna pontuais da data + recorrentes cujo dia da semana bate com a data.</p>
           <h4>Resposta 200 OK</h4>
           <pre><code>[
   {
     "id": "uuid",
     "nome": "Revisar PRs",
-    "estado": "IDLE",
-    "tempoTotalSegundos": 0,
-    "criadoEm": "2026-06-20T10:00:00",
-    "concluidoEm": null
+    "descricao": null,
+    "tipo": "RECORRENTE",
+    "diasSemana": "SEG,QUA,SEX",
+    "horario": "09:00",
+    "data": null,
+    "concluida": false,
+    "criadoEm": "2026-06-20T10:00:00"
   }
 ]</code></pre>
-          <p style="margin-top:8px"><code>tempoTotalSegundos</code> é a soma dos segmentos fechados. Para tarefas <span class="st st-running" style="font-size:11px">RUNNING</span>, o frontend incrementa localmente a cada segundo.</p>
+          <p style="margin-top:8px">Para tarefas <code>RECORRENTE</code>, <code>concluida</code> é <code>true</code> se existe registro em <code>ConclusaoRecorrente</code> para o par <code>(tarefa_id, date)</code>.</p>
         </div>
       </div>
 
@@ -219,9 +222,13 @@
           <span class="ep-path">/api/workspaces/{workspaceId}/tarefas</span>
         </div>
         <div class="ep-body">
-          <p>Cria uma nova tarefa. Se <code>nome</code> for omitido, o backend usa <code>"Nova tarefa"</code>.</p>
-          <h4>Body (opcional)</h4>
-          <pre><code>{ "nome": "Escrever testes" }</code></pre>
+          <p>Cria uma nova tarefa pontual ou recorrente.</p>
+          <h4>Body</h4>
+          <pre><code>// PONTUAL
+{ "nome": "Preparar proposta", "tipo": "PONTUAL", "data": "2026-06-25" }
+
+// RECORRENTE
+{ "nome": "Stand-up", "tipo": "RECORRENTE", "diasSemana": "SEG,TER,QUA,QUI,SEX", "horario": "09:00" }</code></pre>
           <h4>Resposta 201 Created</h4>
           <p>Objeto <code>TarefaResponse</code></p>
         </div>
@@ -229,74 +236,17 @@
 
       <div class="endpoint">
         <div class="ep-head">
-          <span class="method m-patch">PATCH</span>
-          <span class="ep-path">/api/tarefas/{id}/nome</span>
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/tarefas/{id}/toggle</span>
         </div>
         <div class="ep-body">
-          <p>Renomeia uma tarefa.</p>
-          <h4>Body</h4>
-          <pre><code>{ "nome": "Escrever testes unitários" }</code></pre>
+          <p>Alterna o estado de conclusão da tarefa para uma data específica. Query param <code>date=YYYY-MM-DD</code> (obrigatório).</p>
+          <ul style="margin-top:8px">
+            <li><strong>PONTUAL</strong>: inverte <code>concluida</code> (boolean)</li>
+            <li><strong>RECORRENTE</strong>: cria ou remove <code>ConclusaoRecorrente(tarefa_id, date)</code></li>
+          </ul>
           <h4>Resposta 200 OK</h4>
-          <p>Objeto <code>TarefaResponse</code></p>
-        </div>
-      </div>
-
-      <div class="endpoint">
-        <div class="ep-head">
-          <span class="method m-post">POST</span>
-          <span class="ep-path">/api/tarefas/{id}/iniciar</span>
-        </div>
-        <div class="ep-body">
-          <p>Inicia ou retoma o timer. Transições válidas: <span class="st st-idle" style="font-size:11px">IDLE</span> → <span class="st st-running" style="font-size:11px">RUNNING</span>, <span class="st st-paused" style="font-size:11px">PAUSED</span> → <span class="st st-running" style="font-size:11px">RUNNING</span>.</p>
-          <h4>Resposta 200 OK / Erros</h4>
-          <div class="ep-errors"><span class="err">422</span></div>
-        </div>
-      </div>
-
-      <div class="endpoint">
-        <div class="ep-head">
-          <span class="method m-post">POST</span>
-          <span class="ep-path">/api/tarefas/{id}/pausar</span>
-        </div>
-        <div class="ep-body">
-          <p>Pausa o timer. Transição válida: <span class="st st-running" style="font-size:11px">RUNNING</span> → <span class="st st-paused" style="font-size:11px">PAUSED</span>.</p>
-          <h4>Resposta 200 OK / Erros</h4>
-          <div class="ep-errors"><span class="err">422</span></div>
-        </div>
-      </div>
-
-      <div class="endpoint">
-        <div class="ep-head">
-          <span class="method m-post">POST</span>
-          <span class="ep-path">/api/tarefas/{id}/parar</span>
-        </div>
-        <div class="ep-body">
-          <p>Conclui a tarefa. Transições válidas: <span class="st st-running" style="font-size:11px">RUNNING</span> → <span class="st st-done" style="font-size:11px">DONE</span>, <span class="st st-paused" style="font-size:11px">PAUSED</span> → <span class="st st-done" style="font-size:11px">DONE</span>. O campo <code>concluidoEm</code> é preenchido.</p>
-          <h4>Resposta 200 OK / Erros</h4>
-          <div class="ep-errors"><span class="err">422</span></div>
-        </div>
-      </div>
-
-      <div class="endpoint">
-        <div class="ep-head">
-          <span class="method m-post">POST</span>
-          <span class="ep-path">/api/tarefas/{id}/reativar</span>
-        </div>
-        <div class="ep-body">
-          <p>Reabre uma tarefa concluída. Transição válida: <span class="st st-done" style="font-size:11px">DONE</span> → <span class="st st-idle" style="font-size:11px">IDLE</span>. Limpa <code>concluidoEm</code>.</p>
-          <h4>Resposta 200 OK / Erros</h4>
-          <div class="ep-errors"><span class="err">422</span></div>
-        </div>
-      </div>
-
-      <div class="endpoint">
-        <div class="ep-head">
-          <span class="method m-delete">DELETE</span>
-          <span class="ep-path">/api/tarefas/{id}</span>
-        </div>
-        <div class="ep-body">
-          <p>Remove a tarefa e todos os seus segmentos de tempo.</p>
-          <h4>Resposta 204 No Content</h4>
+          <p>Objeto <code>TarefaResponse</code> com <code>concluida</code> atualizado</p>
         </div>
       </div>
 
@@ -306,13 +256,24 @@
           <span class="ep-path">/api/tarefas/{id}/descricao</span>
         </div>
         <div class="ep-body">
-          <p>Atualiza a nota/descrição de uma tarefa.</p>
+          <p>Atualiza a descrição de uma tarefa (acessível pelo bottom sheet do ⋮).</p>
           <h4>Body</h4>
-          <pre><code>{ "descricao": "texto da nota (máx 4000 chars, pode ser null)" }</code></pre>
+          <pre><code>{ "descricao": "texto opcional, pode ser null para limpar" }</code></pre>
           <h4>Resposta 200 OK</h4>
-          <p>Objeto <code>TarefaResponse</code> com campo <code>descricao</code> preenchido.</p>
+          <p>Objeto <code>TarefaResponse</code></p>
           <h4>Erros</h4>
           <div class="ep-errors"><span class="err">404</span></div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="ep-head">
+          <span class="method m-delete">DELETE</span>
+          <span class="ep-path">/api/tarefas/{id}</span>
+        </div>
+        <div class="ep-body">
+          <p>Remove a tarefa e todas as suas <code>ConclusaoRecorrente</code> em cascade.</p>
+          <h4>Resposta 204 No Content</h4>
         </div>
       </div>
 
@@ -327,24 +288,17 @@
           <p>Retorna o resumo do dia. Query param <code>date=YYYY-MM-DD</code> (opcional, padrão: hoje).</p>
           <h4>Resposta 200 OK</h4>
           <pre><code>{
-  "data": "2026-06-20",
-  "totalSegundos": 14400,
-  "porcWorkspace": [
-    { "workspaceId": "uuid", "nome": "Trabalho", "cor": "#A7C7E7", "segundos": 9000 },
-    { "workspaceId": "uuid", "nome": "Estudos",  "cor": "#B5EAD7", "segundos": 5400 }
-  ],
-  "timeline": [
-    {
-      "tarefaId": "uuid",
-      "tarefaNome": "Revisar PRs",
-      "workspaceCor": "#A7C7E7",
-      "inicio": "2026-06-20T09:00:00Z",
-      "fim":    "2026-06-20T10:30:00Z"
-    }
-  ],
-  "tarefaMaisLonga": { "id": "uuid", "nome": "Revisar PRs", "segundos": 5400 }
+  "data": "2026-06-25",
+  "totalTarefas": 8,
+  "totalConcluidas": 5,
+  "percentualConcluido": 62,
+  "diaCompleto": false,
+  "porWorkspace": [
+    { "workspaceId": "uuid", "nome": "Trabalho", "cor": "#A7C7E7", "total": 5, "concluidas": 4 },
+    { "workspaceId": "uuid", "nome": "Estudos",  "cor": "#B5EAD7", "total": 3, "concluidas": 1 }
+  ]
 }</code></pre>
-          <p style="margin-top:8px"><code>porcWorkspace</code> ordenado por tempo desc. <code>tarefaMaisLonga</code> pode ser <code>null</code>.</p>
+          <p style="margin-top:8px"><code>diaCompleto</code> é <code>true</code> quando <code>totalTarefas &gt; 0 &amp;&amp; totalConcluidas == totalTarefas</code>. Dia sem tarefas retorna zeros.</p>
         </div>
       </div>
 

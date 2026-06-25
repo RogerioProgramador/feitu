@@ -138,21 +138,23 @@
 │   ├── Usuario.java
 │   ├── Workspace.java
 │   ├── Tarefa.java
-│   ├── TarefaEstado.java          # enum: IDLE, RUNNING, PAUSED, DONE
-│   ├── SegmentoTempo.java
+│   ├── TarefaTipo.java            # enum: PONTUAL, RECORRENTE
+│   ├── ConclusaoRecorrente.java   # UNIQUE(tarefa_id, data)
+│   ├── InviteCode.java
 │   └── PushSubscription.java
 ├── dto/                           # todos são Java records
 │   ├── RegisterRequest / LoginRequest / AuthResponse
 │   ├── WorkspaceRequest / WorkspaceResponse / ReorderRequest
-│   ├── TarefaRequest / TarefaResponse / RenomearRequest
-│   ├── DailySummaryResponse / WorkspaceSummary / TimelineItem
+│   ├── TarefaRequest / TarefaResponse / AtualizarDescricaoRequest
+│   ├── DailySummaryResponse / WorkspaceSummary
 │   ├── SubscribeRequest / UnsubscribeRequest
 │   └── NotificacaoConfigRequest / UsuarioResponse
 ├── repository/
 │   ├── UsuarioRepository
-│   ├── WorkspaceRepository
+│   ├── WorkspaceRepository        # countByUsuarioId → limite de 3
 │   ├── TarefaRepository
-│   ├── SegmentoTempoRepository
+│   ├── ConclusaoRecorrenteRepository
+│   ├── InviteCodeRepository
 │   └── PushSubscriptionRepository
 ├── security/
 │   ├── JwtService.java            # geração e validação HMAC-SHA256
@@ -160,10 +162,9 @@
 │   └── UserDetailsServiceImpl.java
 ├── service/
 │   ├── AuthService.java
-│   ├── WorkspaceService.java
-│   ├── TarefaService.java         # máquina de estados do timer
-│   ├── SegmentoTempoService.java  # abrir/fechar segmentos, calcular total
-│   ├── AnalyticsService.java
+│   ├── WorkspaceService.java      # limite de 3, guard em criar()
+│   ├── TarefaService.java         # listarDoDia, toggle, PONTUAL vs RECORRENTE
+│   ├── AnalyticsService.java      # count-based (não timer-based)
 │   ├── PushSubscriptionService.java
 │   └── UsuarioService.java
 ├── notification/
@@ -183,28 +184,28 @@
 │   ├── tarefaApi.ts
 │   └── analyticsApi.ts
 ├── composables/
-│   ├── useAuth.ts            # wrap do authStore com logout + router
-│   └── useTimer.ts           # tick reativo: setInterval local quando RUNNING
+│   └── useAuth.ts            # wrap do authStore com logout + router
 ├── components/
-│   ├── TabBar.vue            # abas de workspace + criação inline
-│   ├── TaskList.vue          # lista tarefas ativas + botão nova tarefa
-│   ├── TaskItem.vue          # item com timer, botões de ação, edição de nome
-│   └── CompletedSection.vue  # seção recolhível de tarefas concluídas
+│   ├── TabBar.vue            # abas de workspace (sem criação inline)
+│   ├── TaskList.vue          # lista tarefas do dia + quick-add
+│   ├── TaskItem.vue          # checkbox + ⋮ popover + bottom sheet
+│   └── CriacaoAvancadaSheet.vue  # bottom sheet: tipo, diasSemana, horário
 ├── pages/
 │   ├── LoginPage.vue
 │   ├── RegisterPage.vue
 │   ├── WorkspacePage.vue     # shell principal: header + TabBar + TaskList
-│   └── AnalyticsView.vue     # resumo do dia: total, barras, timeline
+│   ├── AnalyticsView.vue     # resumo do dia: estados A/B/C
+│   └── SettingsPage.vue      # tema, fuso, workspaces (criar/deletar), notificação, conta
 ├── router/
 │   └── index.ts              # rotas + guard de autenticação
 ├── stores/
 │   ├── authStore.ts          # token + email em localStorage
 │   ├── workspaceStore.ts
-│   └── tarefaStore.ts        # indexed por workspaceId
+│   ├── tarefaStore.ts        # indexed por workspaceId
+│   └── settingsStore.ts      # tema, timezone
 ├── types/
 │   └── index.ts              # interfaces TypeScript espelhando DTOs do backend
 └── utils/
-    ├── formatarTempo.ts      # segundos → "HH:MM:SS"
     └── formatarData.ts       # ISO → "DD/MM/YYYY", hojeISO()</pre>
 
       <h2>Modelo de dados</h2>
@@ -224,19 +225,30 @@ Workspace
   ordem       INT
   usuario_id  UUID  FK → Usuario
 
+InviteCode
+  id    UUID  PK
+  code  VARCHAR  UNIQUE
+  ativo BOOLEAN  DEFAULT true
+
 Tarefa
   id            UUID  PK
   nome          VARCHAR
-  estado        ENUM(IDLE, RUNNING, PAUSED, DONE)
-  workspace_id  UUID  FK → Workspace
+  descricao     TEXT  (nullable)
+  tipo          ENUM(PONTUAL, RECORRENTE)
+  dias_semana   VARCHAR  (ex: "SEG,QUA,SEX" — RECORRENTE)
+  horario       TIME  (nullable — horário da recorrência)
+  data          DATE  (nullable — PONTUAL)
+  concluida     BOOLEAN  DEFAULT false  (PONTUAL)
+  concluida_em  TIMESTAMP  (PONTUAL)
   criado_em     TIMESTAMP
-  concluido_em  TIMESTAMP  (null se não concluída)
+  workspace_id  UUID  FK → Workspace
 
-SegmentoTempo
-  id        UUID  PK
-  tarefa_id UUID  FK → Tarefa
-  inicio    TIMESTAMP WITH TIME ZONE
-  fim       TIMESTAMP WITH TIME ZONE  (null = segmento aberto / timer rodando)
+ConclusaoRecorrente
+  id            UUID  PK
+  tarefa_id     UUID  FK → Tarefa
+  data          DATE
+  concluida_em  TIMESTAMP
+  UNIQUE (tarefa_id, data)
 
 PushSubscription
   id          UUID  PK

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feitu — Checklist com timer</title>
+  <title>Feitu — Checklist diário de tarefas</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,8 +63,8 @@
 
       <div class="page-head">
         <div class="badge badge-blue">Feitu</div>
-        <h1 class="title">Checklist com timer</h1>
-        <p class="desc">Ao invés de só marcar tarefas como feitas, você também cronometra cada uma — e ao final do dia tem um resumo real de onde foi o seu tempo.</p>
+        <h1 class="title">Checklist diário de tarefas</h1>
+        <p class="desc">Organize suas tarefas do dia em workspaces, marque como feitas com um checkbox e veja um resumo ao final — sem timer, sem complexidade.</p>
       </div>
 
       <h2 class="first">O que você pode fazer</h2>
@@ -72,48 +72,46 @@
       <div class="feature-grid">
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Workspaces</strong> para organizar tarefas por contexto — Trabalho, Estudos, Projetos Pessoais</span>
+          <span class="fcard-text"><strong>Workspaces</strong> para organizar tarefas por contexto — Trabalho, Estudos, Projetos Pessoais (máx. 3, gerenciados em Configurações)</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Adicione tarefas</strong> com um clique dentro de cada workspace</span>
+          <span class="fcard-text"><strong>Tarefas pontuais</strong> — criadas para um dia específico; marque ✓ e pronto</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Timer por tarefa</strong> — inicie, pause e pare individualmente</span>
+          <span class="fcard-text"><strong>Tarefas recorrentes</strong> — aparecem automaticamente nos dias da semana configurados (ex: "Stand-up toda segunda e quarta")</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Resumo do dia</strong> — total de horas, tempo por workspace, timeline cronológica</span>
+          <span class="fcard-text"><strong>Ações rápidas</strong> — botão ⋮ em cada tarefa abre popover com "Ver descrição" e "Excluir tarefa"</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Notificação push</strong> no horário configurado lembrando de fazer o resumo</span>
+          <span class="fcard-text"><strong>Resumo do dia</strong> — percentual de conclusão, contagem por workspace, navegação entre datas</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>PWA</strong> — instale no celular ou desktop, funciona offline para visualização</span>
+          <span class="fcard-text"><strong>Notificação push</strong> no horário configurado para lembrar de fechar o dia</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Nota por tarefa</strong> — adicione descrições e contexto diretamente em cada tarefa, acessível por um botão de nota</span>
+          <span class="fcard-text"><strong>PWA</strong> — instale no celular ou desktop; funciona offline para visualização</span>
         </div>
         <div class="fcard">
           <div class="fcard-check">✓</div>
-          <span class="fcard-text"><strong>Histórico por data</strong> — tarefas concluídas em dias anteriores agrupadas por dia com total de tempo</span>
+          <span class="fcard-text"><strong>Dark mode</strong> — automático pelo sistema operacional ou manual em Configurações</span>
         </div>
       </div>
 
       <h2>Fluxo básico</h2>
 
       <ol class="steps">
-        <li>Crie um workspace <span style="background:rgba(0,0,0,0.04);padding:1px 7px;border-radius:4px;font-family:monospace;font-size:13px">"Trabalho"</span></li>
-        <li>Adicione uma tarefa <span style="background:rgba(0,0,0,0.04);padding:1px 7px;border-radius:4px;font-family:monospace;font-size:13px">"Revisar PRs"</span></li>
-        <li>Clique <strong>▶</strong> para iniciar o timer</li>
-        <li>Clique <strong>⏸</strong> para pausar — o timer para e retoma de onde parou</li>
-        <li>Clique <strong>⏹</strong> para concluir — tarefa vai para a seção "Concluídas"</li>
-        <li>Repita ao longo do dia conforme trabalha</li>
-        <li>Acesse o <strong>Resumo</strong> para ver o que foi feito e quanto tempo levou</li>
+        <li>Crie um workspace em <strong>Configurações → Workspaces</strong></li>
+        <li>Adicione uma tarefa (quick-add ou criação avançada com tipo/recorrência)</li>
+        <li>Marque o <strong>checkbox</strong> quando concluir</li>
+        <li>Para ver a descrição ou deletar, toque no <strong>⋮</strong> da tarefa</li>
+        <li>Acesse o <strong>Resumo</strong> para ver o percentual de conclusão do dia</li>
       </ol>
 
       <h2>Paleta visual</h2>
@@ -154,22 +152,22 @@
             <tr>
               <td>Peach</td>
               <td><span class="swatch" style="background:#FFDAC1"></span><code>#FFDAC1</code></td>
-              <td>Timer ativo</td>
+              <td>Workspaces — cor padrão terciária</td>
             </tr>
             <tr>
               <td>Peach Deep</td>
               <td><span class="swatch" style="background:#E07B4F"></span><code>#E07B4F</code></td>
-              <td>Timer ativo — botão e indicador</td>
+              <td>Ações destrutivas (excluir) e checkmark do logo</td>
             </tr>
             <tr>
               <td>Lavender</td>
               <td><span class="swatch" style="background:#E2C6FF"></span><code>#E2C6FF</code></td>
-              <td>Analytics / gráficos</td>
+              <td>Analytics / resumo</td>
             </tr>
             <tr>
               <td>Lavender Deep</td>
               <td><span class="swatch" style="background:#8A5FC0"></span><code>#8A5FC0</code></td>
-              <td>Analytics — totais e gráficos</td>
+              <td>Analytics — percentuais e gráficos</td>
             </tr>
           </tbody>
         </table>

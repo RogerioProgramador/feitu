@@ -64,82 +64,62 @@
       <div class="page-head">
         <div class="badge badge-teal">Guias</div>
         <h1 class="title">Como funciona</h1>
-        <p class="desc">Workspaces, ciclo de vida do timer, cálculo de tempo, analytics e notificações push.</p>
+        <p class="desc">Workspaces, tipos de tarefa, conclusão por checkbox, analytics e notificações push.</p>
       </div>
 
       <h2 class="first">Workspaces</h2>
 
-      <p>Workspaces são abas de organização. Cada workspace tem um <strong>nome</strong> e uma <strong>cor</strong>, e contém suas próprias tarefas. Você pode ter quantos quiser — a sugestão é separar por contexto: Trabalho, Estudos, Projetos Pessoais.</p>
-      <p>A ordem dos workspaces pode ser reorganizada arrastando as abas. A nova ordem é persistida automaticamente no backend. Workspaces podem ser deletados em <strong>Configurações</strong> (rota <code>/settings</code>).</p>
+      <p>Workspaces são abas de organização. Cada workspace tem um <strong>nome</strong> e uma <strong>cor</strong>, e contém suas próprias tarefas. O limite é <strong>3 workspaces por usuário</strong> — criação e deleção estão em <strong>Configurações</strong> (<code>/settings</code>). A sugestão é separar por contexto: Trabalho, Estudos, Projetos Pessoais.</p>
 
-      <h2>Ciclo de vida do timer</h2>
+      <h2>Tipos de tarefa</h2>
 
-      <p>Cada tarefa tem um <strong>estado</strong> que controla o que pode acontecer com ela:</p>
-
-      <pre>        ┌──────────────────────────────┐
-        │                              │
-        ▼                              │  reativar
-      IDLE ──▶ RUNNING ──▶ PAUSED     │
-                  │           │        │
-                  └─────┬─────┘        │
-                        │ parar        │
-                        ▼             │
-                       DONE ──────────┘</pre>
+      <p>Cada tarefa tem um <strong>tipo</strong> que define quando ela aparece:</p>
 
       <div class="t-wrap" style="margin-top:20px">
         <table>
           <thead>
-            <tr><th>Estado</th><th>Descrição</th><th>Ações disponíveis</th></tr>
+            <tr><th>Tipo</th><th>Descrição</th><th>Campo de data</th></tr>
           </thead>
           <tbody>
             <tr>
-              <td><span class="st st-idle">IDLE</span></td>
-              <td>Tarefa criada, timer nunca iniciado</td>
-              <td>Iniciar</td>
+              <td><code>PONTUAL</code></td>
+              <td>Aparece somente na data criada (ex: "Preparar apresentação hoje")</td>
+              <td><code>data: LocalDate</code></td>
             </tr>
             <tr>
-              <td><span class="st st-running">RUNNING</span></td>
-              <td>Timer rodando agora</td>
-              <td>Pausar, Parar</td>
-            </tr>
-            <tr>
-              <td><span class="st st-paused">PAUSED</span></td>
-              <td>Timer pausado, tempo acumulado preservado</td>
-              <td>Retomar (→RUNNING), Parar</td>
-            </tr>
-            <tr>
-              <td><span class="st st-done">DONE</span></td>
-              <td>Concluída, com <code>concluidoEm</code> registrado</td>
-              <td>Reativar (→IDLE)</td>
+              <td><code>RECORRENTE</code></td>
+              <td>Aparece nos dias da semana configurados, toda semana (ex: "Stand-up SEG,QUA,SEX")</td>
+              <td><code>diasSemana: "SEG,QUA,SEX"</code></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2>Como o tempo é calculado</h2>
+      <p style="margin-top:12px">Tarefas recorrentes são criadas uma única vez e aparecem automaticamente nos dias corretos. A conclusão de uma recorrente em um dia específico é registrada em <code>ConclusaoRecorrente</code> — o checkbox reseta à meia-noite (UTC-3).</p>
 
-      <p>O backend não usa uma flag de "duração acumulada" — ele armazena <strong>segmentos de tempo</strong> individuais:</p>
+      <h2>Como a conclusão funciona</h2>
 
-      <pre>SegmentoTempo
-  inicio: Instant   ← quando o timer foi iniciado/retomado
-  fim:    Instant   ← quando foi pausado/parado (null = segmento aberto)</pre>
+      <p>Ao marcar um checkbox, o frontend chama <code>POST /api/tarefas/{id}/toggle?date=YYYY-MM-DD</code>:</p>
 
-      <p>O <code>tempoTotalSegundos</code> retornado pela API é a <strong>soma de todos os segmentos fechados</strong> (<code>fim != null</code>) da tarefa. Um segmento com <code>fim = null</code> significa que o timer está rodando agora.</p>
+      <ul>
+        <li><strong>PONTUAL</strong>: alterna o campo <code>concluida</code> (boolean) na entidade Tarefa</li>
+        <li><strong>RECORRENTE</strong>: cria ou remove um registro em <code>ConclusaoRecorrente(tarefa_id, data)</code> com constraint UNIQUE</li>
+      </ul>
 
-      <p>O frontend recebe o <code>tempoTotalSegundos</code> do servidor e usa um <code>setInterval</code> local para incrementar o display a cada segundo quando o estado é <span class="st st-running">RUNNING</span> — sem polling ao servidor.</p>
+      <p>A API retorna o estado atualizado da tarefa com <code>concluida: true/false</code>. O frontend atualiza a store Pinia localmente sem recarregar a lista.</p>
 
       <h2>Resumo diário (Analytics)</h2>
 
       <p>Ao acessar a tela de Resumo, o frontend consulta <code>GET /api/analytics/daily?date=YYYY-MM-DD</code>. O backend:</p>
 
       <ol class="main" style="list-style:decimal;padding-left:22px;margin-bottom:0">
-        <li>Busca todos os <code>SegmentoTempo</code> do usuário cujo <code>inicio</code> está dentro do dia solicitado (meia-noite a meia-noite no UTC-3)</li>
-        <li>Agrupa por workspace para calcular o tempo total em cada um</li>
-        <li>Identifica a tarefa com maior tempo acumulado</li>
-        <li>Monta a timeline em ordem cronológica de início</li>
+        <li>Busca todos os workspaces do usuário</li>
+        <li>Para cada workspace, carrega as tarefas do dia (pontuais da data + recorrentes do dia da semana)</li>
+        <li>Conta total de tarefas e quantas estão concluídas</li>
+        <li>Calcula <code>percentualConcluido</code> e flag <code>diaCompleto</code></li>
       </ol>
 
-      <p style="margin-top:12px">O frontend exibe: <strong>total do dia</strong> em HH:MM:SS, <strong>barras horizontais</strong> por workspace (proporcionais ao tempo), <strong>tarefa mais longa</strong> com destaque e <strong>timeline</strong> cronológica com cor do workspace.</p>
+      <p style="margin-top:12px">O frontend exibe três estados: <strong>A</strong> (parcial — barras de progresso por workspace), <strong>B</strong> (tudo feito — animação de celebração), <strong>C</strong> (sem tarefas no dia).</p>
 
       <h2>Notificações push</h2>
 
@@ -172,13 +152,16 @@
 
       <p>O Service Worker usa a estratégia <code>NetworkFirst</code> para todas as chamadas <code>/api/</code> — tenta o servidor primeiro, cai para o cache se offline.</p>
 
-      <h2>Nota por tarefa</h2>
+      <h2>Ações da tarefa (⋮)</h2>
 
-      <p>Cada tarefa tem um campo de nota/descrição opcional. Para adicionar ou editar, toque no botão de nota (ícone de lápis) na barra de ações da tarefa. Um painel deslizante (bottom sheet) abre com uma área de texto. A nota é salva via <code>PATCH /api/tarefas/{id}/descricao</code> e persistida no banco. O botão fica com destaque em lavanda quando há conteúdo.</p>
+      <p>Cada tarefa tem um botão <strong>⋮</strong> na extremidade direita da linha. Ao tocar:</p>
 
-      <h2>Histórico</h2>
-
-      <p>Tarefas concluídas em dias anteriores ficam acessíveis através do botão <strong>Histórico</strong> na seção de concluídas. O Histórico é uma sub-tela dentro do workspace que agrupa as tarefas por data (Ontem, 15/06/2026, etc.), mostrando o total de tempo por dia e o horário de conclusão de cada tarefa. Tarefas do histórico também podem ser reativadas.</p>
+      <ol class="steps">
+        <li>Um <strong>popover</strong> aparece com duas opções: "Ver descrição" e "Excluir tarefa"</li>
+        <li><strong>"Ver descrição"</strong> abre um <em>bottom sheet</em> com o nome, tipo/horário, campo de descrição (visualização ou edição) e botão de excluir</li>
+        <li>No modo edição, a descrição é salva via <code>PATCH /api/tarefas/{id}/descricao</code></li>
+        <li><strong>"Excluir tarefa"</strong> chama <code>DELETE /api/tarefas/{id}</code> e remove da lista</li>
+      </ol>
 
       <h2>Invite code</h2>
 

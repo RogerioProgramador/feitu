@@ -223,14 +223,15 @@ java -jar target/feitu-0.0.1-SNAPSHOT.jar</pre>
 │   └── JwtServiceTest.java           # unitário — geração e validação de tokens
 ├── service/
 │   ├── AuthServiceTest.java          # unitário — Mockito
-│   ├── WorkspaceServiceTest.java     # unitário — Mockito
-│   ├── TarefaServiceTest.java        # unitário — máquina de estados
-│   ├── SegmentoTempoServiceTest.java
-│   ├── AnalyticsServiceTest.java
+│   ├── WorkspaceServiceTest.java     # inclui: criar com 3 WSs lança BusinessException
+│   ├── TarefaServiceTest.java        # PONTUAL toggle, RECORRENTE toggle, listarDoDia
+│   ├── AnalyticsServiceTest.java     # count-based (não timer)
 │   └── DailyReviewSchedulerTest.java
 └── controller/
     ├── AuthControllerTest.java       # integração — MockMvc + H2 in-memory
-    └── WorkspaceControllerTest.java  # integração — MockMvc + H2 in-memory
+    ├── WorkspaceControllerTest.java
+    ├── TarefaControllerTest.java
+    └── AnalyticsControllerTest.java
 
 frontend/src/pages/
 ├── LoginPage.test.ts                 # Vitest + @vue/test-utils
