@@ -8,11 +8,11 @@ import com.feitu.repository.WorkspaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,12 +22,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Testes de AnalyticsService (arquivo renomeado de SegmentoTempoServiceTest).
- */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class SegmentoTempoServiceTest {
+class AnalyticsServiceTest {
 
     @Mock TarefaRepository tarefaRepository;
     @Mock WorkspaceRepository workspaceRepository;
@@ -48,7 +45,7 @@ class SegmentoTempoServiceTest {
     @Test
     void sumarioDiarioComMixRetornaTotalCorreto() {
         Tarefa pontual = pontual(false);
-        Tarefa recorrente = recorrente(true);
+        Tarefa recorrente = recorrente();
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
         when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
@@ -66,7 +63,7 @@ class SegmentoTempoServiceTest {
     @Test
     void sumarioDiarioTudoConcluido() {
         Tarefa pontual = pontual(true);
-        Tarefa recorrente = recorrente(true);
+        Tarefa recorrente = recorrente();
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
         when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
@@ -99,16 +96,12 @@ class SegmentoTempoServiceTest {
         return t;
     }
 
-    private Tarefa recorrente(boolean concluida) {
+    private Tarefa recorrente() {
         Tarefa t = new Tarefa();
         t.setNome("Rec");
         t.setTipo(TipoTarefa.RECORRENTE);
         t.setDiasSemana("TER,SEX");
-        try {
-            var f = Tarefa.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(t, UUID.randomUUID());
-        } catch (Exception ignored) {}
+        ReflectionTestUtils.setField(t, "id", UUID.randomUUID());
         return t;
     }
 }

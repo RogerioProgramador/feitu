@@ -64,4 +64,19 @@ describe('RegisterPage', () => {
     await flushPromises()
     expect(mockRegister).toHaveBeenCalledWith('b@test.com', 'senha1234', 'FEITU-TEST')
   })
+
+  it('exibe erro de API em caso de falha no register', async () => {
+    mockRegister.mockRejectedValueOnce({
+      response: { data: { detail: 'Código de convite inválido' } },
+    })
+    const w = mountPage()
+    await w.find('input[type="email"]').setValue('c@test.com')
+    const inputs = w.findAll('input[type="password"]')
+    await inputs[0].setValue('senha1234')
+    await inputs[1].setValue('senha1234')
+    await w.find('input[type="text"]').setValue('FEITU-INVALIDO')
+    await w.find('form').trigger('submit')
+    await flushPromises()
+    expect(w.text()).toContain('Código de convite inválido')
+  })
 })
