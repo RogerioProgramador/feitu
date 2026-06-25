@@ -116,6 +116,14 @@ cd backend && mvn package
 cd frontend && npm run dev        # dev server :5173, proxy /api → :8080
 cd frontend && npm run typecheck  # vue-tsc --noEmit
 cd frontend && npm run test       # Vitest
+
+# Testes E2E (Playwright) — executar a partir de tests/
+# Pré-requisito: copiar tests/.env.example para tests/.env e preencher
+cd tests && npx playwright install chromium  # primeira vez
+cd tests && npm test                          # contra http://localhost:8080
+BASE_URL=https://feitu.fly.dev cd tests && npm test  # contra produção
+cd tests && npm run test:headed               # com browser visível (debug)
+cd tests && npm run report                   # abrir relatório HTML
 ```
 
 ---
