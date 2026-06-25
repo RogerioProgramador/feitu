@@ -62,12 +62,6 @@ public class WorkspaceController {
         workspaceService.deletar(id, usuarioId(principal));
     }
 
-    @DeleteMapping("/all")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletarTodos(@AuthenticationPrincipal UserDetails principal) {
-        workspaceService.deletarTodos(usuarioId(principal));
-    }
-
     private UUID usuarioId(UserDetails principal) {
         return usuarioRepository.findByEmail(principal.getUsername())
                 .orElseThrow().getId();

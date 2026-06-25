@@ -85,18 +85,6 @@ public class WorkspaceService {
         workspaceRepository.delete(ws);
     }
 
-    public void deletarTodos(UUID usuarioId) {
-        List<Workspace> workspaces = workspaceRepository.findByUsuarioIdOrderByOrdem(usuarioId);
-        for (Workspace ws : workspaces) {
-            List<Tarefa> tarefas = tarefaRepository.findByWorkspaceId(ws.getId());
-            for (Tarefa tarefa : tarefas) {
-                conclusaoRepository.deleteByTarefaId(tarefa.getId());
-            }
-            tarefaRepository.deleteAll(tarefas);
-            workspaceRepository.delete(ws);
-        }
-    }
-
     private Workspace buscarDoUsuario(UUID id, UUID usuarioId) {
         return workspaceRepository.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado"));
