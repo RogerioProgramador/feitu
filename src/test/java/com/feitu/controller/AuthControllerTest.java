@@ -59,13 +59,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginSenhaErradaRetorna401() throws Exception {
+    void loginSenhaErradaRetorna422() throws Exception {
         registrar("err@test.com", "senha1234");
 
         mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(new LoginRequest("err@test.com", "errada"))))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

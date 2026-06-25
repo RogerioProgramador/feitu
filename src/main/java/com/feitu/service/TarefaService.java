@@ -58,7 +58,7 @@ public class TarefaService {
         List<Tarefa> pontuais = tarefaRepository.findByWorkspaceIdAndData(workspaceId, date);
 
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
-        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesParaDia(workspaceId, diaSemana);
+        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesParaDia(workspaceId, diaSemana, date);
 
         // Buscar conclusões das recorrentes em batch para evitar N+1
         Set<UUID> idsRecorrentes = recorrentes.stream().map(Tarefa::getId).collect(Collectors.toSet());
@@ -169,7 +169,7 @@ public class TarefaService {
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
 
         List<Tarefa> pontuais = tarefaRepository.findPontuaisDoUsuarioParaData(usuarioId, date);
-        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesDoUsuarioParaDia(usuarioId, diaSemana);
+        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesDoUsuarioParaDia(usuarioId, diaSemana, date);
 
         Set<UUID> concluidasHoje = recorrentes.stream()
                 .filter(t -> conclusaoRepository.findByTarefaIdAndData(t.getId(), date).isPresent())
