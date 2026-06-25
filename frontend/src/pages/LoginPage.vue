@@ -39,7 +39,7 @@ async function entrar() {
           </svg>
         </div>
         <h1 class="font-display italic text-[32px] text-feitu-text dark:text-night-text leading-none">Feitu</h1>
-        <p class="text-[13.5px] text-[#9A9388]">Checklist com timer integrado</p>
+        <p class="text-[13.5px] text-[#9A9388]">Checklist diário de tarefas</p>
       </div>
 
       <!-- Card -->

@@ -38,11 +38,11 @@ historias/
 *.log
 logs/
 
-# Design specs (locais)
-specification-to-design
-Feitu v2.html
-Feitu v2.dc.html
+# Design artifacts e planejamento (locais)
+design/
+plano
 spec-design-v2.md
-test-ux-audit.mjs
-feitu_v2_workspaces_para_configuracoes.html
-Feitu_v2_acoes_da_tarefa.html
+specification-to-design
+
+# Dependências (raiz)
+node_modules/
