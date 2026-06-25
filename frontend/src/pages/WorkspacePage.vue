@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import TabBar from '../components/TabBar.vue'
 import TaskList from '../components/TaskList.vue'
 import { hojeISO } from '../utils/formatarData'
 
 const wsStore = useWorkspaceStore()
+const router = useRouter()
 
 const hoje = hojeISO()
 
