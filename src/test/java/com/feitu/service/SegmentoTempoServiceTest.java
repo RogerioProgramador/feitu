@@ -51,7 +51,7 @@ class SegmentoTempoServiceTest {
         Tarefa recorrente = recorrente(true);
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
-        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER", hoje)).thenReturn(List.of(recorrente));
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
         when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
                 .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
 
@@ -69,7 +69,7 @@ class SegmentoTempoServiceTest {
         Tarefa recorrente = recorrente(true);
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
-        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER", hoje)).thenReturn(List.of(recorrente));
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
         when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
                 .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
 
@@ -81,7 +81,7 @@ class SegmentoTempoServiceTest {
     @Test
     void sumarioDiarioSemTarefasRetornaZeros() {
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of());
-        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER", hoje)).thenReturn(List.of());
+        when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of());
 
         DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
 

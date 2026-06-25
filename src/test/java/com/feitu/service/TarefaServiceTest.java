@@ -162,7 +162,7 @@ class TarefaServiceTest {
         // hoje é terça (TER) neste contexto de teste - usamos data específica
         LocalDate terca = LocalDate.of(2026, 6, 23); // terça-feira
         when(tarefaRepository.findByWorkspaceIdAndData(wsId, terca)).thenReturn(List.of(pontual));
-        when(tarefaRepository.findRecorrentesParaDia(wsId, "TER", terca)).thenReturn(List.of(recorrente));
+        when(tarefaRepository.findRecorrentesParaDia(wsId, "TER")).thenReturn(List.of(recorrente));
         when(conclusaoRepository.findByTarefaIdAndData(any(), eq(terca))).thenReturn(Optional.empty());
 
         List<TarefaResponse> result = service.listarParaDia(wsId, uid, terca);

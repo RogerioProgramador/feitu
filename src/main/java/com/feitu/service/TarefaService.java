@@ -58,7 +58,8 @@ public class TarefaService {
         List<Tarefa> pontuais = tarefaRepository.findByWorkspaceIdAndData(workspaceId, date);
 
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
-        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesParaDia(workspaceId, diaSemana, date);
+        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesParaDia(workspaceId, diaSemana)
+                .stream().filter(t -> !dataCriacaoLocalBrasil(t).isAfter(date)).toList();
 
         // Buscar conclusões das recorrentes em batch para evitar N+1
         Set<UUID> idsRecorrentes = recorrentes.stream().map(Tarefa::getId).collect(Collectors.toSet());
@@ -164,12 +165,22 @@ public class TarefaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado"));
     }
 
+    /**
+     * Converte criadoEm (UTC no servidor Fly.io) para data local Brasil (UTC-3, sem DST desde 2019).
+     * Null → LocalDate.MIN para não excluir tarefas sem data de criação (dados legados).
+     */
+    private static LocalDate dataCriacaoLocalBrasil(Tarefa t) {
+        if (t.getCriadoEm() == null) return LocalDate.MIN;
+        return t.getCriadoEm().minusHours(3).toLocalDate();
+    }
+
     /** Utilitário usado por AnalyticsService */
     public List<TarefaResponse> listarParaDiaDoUsuario(UUID usuarioId, LocalDate date) {
         String diaSemana = DIA_PT.get(date.getDayOfWeek());
 
         List<Tarefa> pontuais = tarefaRepository.findPontuaisDoUsuarioParaData(usuarioId, date);
-        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesDoUsuarioParaDia(usuarioId, diaSemana, date);
+        List<Tarefa> recorrentes = tarefaRepository.findRecorrentesDoUsuarioParaDia(usuarioId, diaSemana)
+                .stream().filter(t -> !dataCriacaoLocalBrasil(t).isAfter(date)).toList();
 
         Set<UUID> concluidasHoje = recorrentes.stream()
                 .filter(t -> conclusaoRepository.findByTarefaIdAndData(t.getId(), date).isPresent())
