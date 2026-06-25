@@ -97,13 +97,13 @@ onMounted(() => wsStore.carregar())
           Organize suas tarefas por contexto — trabalho, estudos, casa.
         </p>
         <button
-          @click="wsStore.criandoNovo = true"
+          @click="router.push('/settings')"
           class="flex items-center gap-[9px] mt-[26px] px-[22px] py-[14px] rounded-[14px] bg-feitu-blue-deep text-white text-[15px] font-semibold shadow-[0_10px_24px_-10px_rgba(94,139,182,.6)]"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-            <path d="M12 5v14M5 12h14"/>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14M3 8h18M3 16h18" stroke-width="0"/><path d="M3 8h18M3 16h18" stroke-width="2"/><circle cx="9" cy="8" r="2.6" fill="transparent" stroke="currentColor" stroke-width="2"/><circle cx="15" cy="16" r="2.6" fill="transparent" stroke="currentColor" stroke-width="2"/>
           </svg>
-          Criar workspace
+          Ir para Configurações
         </button>
       </div>
     </div>

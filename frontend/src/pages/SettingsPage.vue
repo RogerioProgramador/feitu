@@ -3,11 +3,13 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAuthStore } from '../stores/authStore'
+import { useWorkspaceStore } from '../stores/workspaceStore'
 import { usuarioApi } from '../api/usuarioApi'
 
 const router = useRouter()
 const settings = useSettingsStore()
 const authStore = useAuthStore()
+const wsStore = useWorkspaceStore()
 
 type Tema = 'claro' | 'escuro' | 'sistema'
 const TEMAS: { value: Tema; label: string }[] = [
@@ -18,6 +20,11 @@ const TEMAS: { value: Tema; label: string }[] = [
 
 const fusoOpen = ref(false)
 const horarioNotificacao = ref<string | null>(null)
+const criandoWs = ref(false)
+const nomeNovoWs = ref('')
+const confirmandoDeletar = ref<string | null>(null)
+
+const CORES = ['#A7C7E7', '#B5EAD7', '#FFDAC1', '#E2C6FF', '#FFD1DC', '#C7E6A7']
 
 const fusoLabel = ref(settings.fusoHorario === 'BR' ? 'América / São Paulo' : 'UTC')
 
@@ -27,7 +34,30 @@ function setFuso(fuso: 'BR' | 'UTC') {
   fusoOpen.value = false
 }
 
+function proximaCor() {
+  return CORES[wsStore.workspaces.length % CORES.length]
+}
+
+async function criarWs() {
+  const nome = nomeNovoWs.value.trim()
+  if (!nome) { criandoWs.value = false; return }
+  await wsStore.criar(nome, proximaCor())
+  nomeNovoWs.value = ''
+  criandoWs.value = false
+}
+
+function cancelarCriarWs() {
+  nomeNovoWs.value = ''
+  criandoWs.value = false
+}
+
+async function deletarWs(id: string) {
+  await wsStore.deletar(id)
+  confirmandoDeletar.value = null
+}
+
 onMounted(async () => {
+  if (!wsStore.workspaces.length) await wsStore.carregar()
   try {
     const perfil = await usuarioApi.me()
     if (perfil.horarioNotificacao) {
@@ -61,6 +91,86 @@ function sair() {
     </div>
 
     <div class="flex-1 overflow-y-auto px-[22px] pb-7 pt-[6px]">
+
+      <!-- WORKSPACES -->
+      <div class="flex items-center justify-between mt-[10px] mb-[9px]">
+        <p class="text-[12px] font-semibold text-[#8C857B] tracking-[.06em] uppercase">WORKSPACES</p>
+        <span style="font: 500 12px 'Space Grotesk'; color: #8C857B;">{{ wsStore.workspaces.length }} / 3</span>
+      </div>
+
+      <div
+        v-if="wsStore.workspaces.length"
+        class="rounded-[14px] border border-[rgba(54,51,46,.07)] dark:border-[rgba(255,255,255,.05)] bg-[#F7F4EE] dark:bg-night-surface overflow-hidden mb-[10px]"
+      >
+        <template v-for="(ws, i) in wsStore.workspaces" :key="ws.id">
+          <!-- Confirmação de delete -->
+          <div v-if="confirmandoDeletar === ws.id" class="px-[16px] py-[13px]">
+            <p style="font: 400 13px/1.4 'Space Grotesk'; color: #6E6A62;" class="mb-[12px]">Apaga todas as tarefas. Tem certeza?</p>
+            <div class="flex gap-[8px]">
+              <button
+                @click="confirmandoDeletar = null"
+                style="flex: 1; padding: 9px; font: 600 13px 'Space Grotesk'; color: #6E6A62; border: 1px solid rgba(54,51,46,.14); border-radius: 10px; background: transparent; cursor: pointer;"
+              >Cancelar</button>
+              <button
+                @click="deletarWs(ws.id)"
+                style="flex: 1; padding: 9px; font: 600 13px 'Space Grotesk'; color: #E07B4F; border: 1px solid rgba(224,123,79,.4); border-radius: 10px; background: transparent; cursor: pointer;"
+              >Deletar</button>
+            </div>
+          </div>
+          <!-- Linha normal -->
+          <div v-else class="flex items-center gap-[12px] px-[16px] py-[13px]">
+            <span class="w-[11px] h-[11px] rounded-full flex-shrink-0" :style="{ backgroundColor: ws.cor ?? '#A7C7E7' }"></span>
+            <span class="flex-1 min-w-0 truncate" style="font: 500 14.5px 'Space Grotesk'; color: #36332E;" :class="'dark:text-night-text'">{{ ws.nome }}</span>
+            <button
+              @click="confirmandoDeletar = ws.id"
+              class="flex-shrink-0 transition hover:text-[#E07B4F]"
+              style="color: #C4BDB1; background: transparent; border: none; cursor: pointer; display: flex; align-items: center;"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 7h14M9 7V5h6v2M7 7l1 12h8l1-12"/>
+              </svg>
+            </button>
+          </div>
+          <div v-if="i < wsStore.workspaces.length - 1" style="height: 1px; background: rgba(54,51,46,.06); margin: 0 16px;"></div>
+        </template>
+      </div>
+
+      <!-- Input de criação inline -->
+      <div v-if="criandoWs" class="mb-[10px]">
+        <input
+          v-focus
+          v-model="nomeNovoWs"
+          @keydown.enter="criarWs"
+          @keydown.esc="cancelarCriarWs"
+          placeholder="Nome do workspace..."
+          style="width: 100%; padding: 13px 16px; font: 500 15px 'Space Grotesk'; color: #36332E; border: 1.5px solid #5E8BB6; border-radius: 14px; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(94,139,182,.12); box-sizing: border-box;"
+        />
+        <div class="flex gap-[8px] mt-[8px]">
+          <button
+            @click="cancelarCriarWs"
+            style="flex: 1; padding: 12px; font: 600 14px 'Space Grotesk'; color: #6E6A62; border: 1px solid rgba(54,51,46,.14); border-radius: 13px; background: transparent; cursor: pointer;"
+          >Cancelar</button>
+          <button
+            @click="criarWs"
+            style="flex: 1; padding: 12px; font: 600 14px 'Space Grotesk'; color: #fff; background: #5E8BB6; border: none; border-radius: 13px; cursor: pointer; box-shadow: 0 10px 24px -10px rgba(94,139,182,.6);"
+          >Criar</button>
+        </div>
+      </div>
+      <!-- Botão dashed "Criar workspace" -->
+      <button
+        v-else
+        @click="wsStore.workspaces.length < 3 ? (criandoWs = true) : null"
+        :disabled="wsStore.workspaces.length >= 3"
+        class="w-full mb-[8px] flex items-center justify-center gap-[8px] rounded-[13px] transition"
+        style="padding: 13px; border: 1.5px dashed rgba(54,51,46,.16); font: 600 14px 'Space Grotesk'; color: #B0A99D; cursor: pointer; background: transparent;"
+        :style="wsStore.workspaces.length >= 3 ? 'opacity: 0.45; cursor: not-allowed;' : ''"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Criar workspace
+      </button>
+      <p style="font: 400 12.5px/1.5 'Space Grotesk'; color: #A49C90;" class="mb-[22px]">
+        Você pode ter até <strong style="color: #6E6A62; font-weight: 600;">3 workspaces</strong>. Remova um para criar outro.
+      </p>
 
       <!-- TEMA -->
       <p class="text-[12px] font-semibold text-[#8C857B] tracking-[.06em] uppercase mt-[10px] mb-[9px]">TEMA</p>

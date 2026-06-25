@@ -6,7 +6,6 @@ import type { Workspace } from '../types'
 export const useWorkspaceStore = defineStore('workspace', () => {
   const workspaces = ref<Workspace[]>([])
   const ativoId = ref<string | null>(null)
-  const criandoNovo = ref(false)
 
   async function carregar() {
     workspaces.value = await workspaceApi.listar()
@@ -44,5 +43,5 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     ativoId.value = id
   }
 
-  return { workspaces, ativoId, criandoNovo, carregar, criar, atualizar, reordenar, deletar, selecionar }
+  return { workspaces, ativoId, carregar, criar, atualizar, reordenar, deletar, selecionar }
 })

@@ -1,33 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 
 const store = useWorkspaceStore()
-
-const criando = computed({
-  get: () => store.criandoNovo,
-  set: (v: boolean) => { store.criandoNovo = v },
-})
-const novoNome = ref('')
-
-const CORES = ['#A7C7E7', '#B5EAD7', '#FFDAC1', '#E2C6FF', '#FFD1DC', '#C7E6A7']
-
-function proximaCor() {
-  return CORES[store.workspaces.length % CORES.length]
-}
-
-async function confirmarNovo() {
-  const nome = novoNome.value.trim()
-  if (!nome) { cancelarNovo(); return }
-  await store.criar(nome, proximaCor())
-  novoNome.value = ''
-  criando.value = false
-}
-
-function cancelarNovo() {
-  novoNome.value = ''
-  criando.value = false
-}
 
 function hexToRgb(hex: string) {
   const h = hex.replace('#', '')
@@ -62,24 +36,5 @@ function hexToRgb(hex: string) {
       />
       {{ ws.nome }}
     </button>
-
-    <template v-if="criando">
-      <input
-        v-focus
-        v-model="novoNome"
-        @keydown.enter="confirmarNovo"
-        @keydown.esc="cancelarNovo"
-        @blur="confirmarNovo"
-        placeholder="Nome..."
-        class="flex-shrink-0 px-3 py-1.5 text-[13.5px] border border-feitu-blue rounded-[11px] outline-none w-28 bg-white dark:bg-night-surface text-feitu-text dark:text-night-text"
-      />
-    </template>
-
-    <button
-      v-else
-      @click="criando = true"
-      class="flex-shrink-0 w-[34px] h-[34px] flex items-center justify-center rounded-[11px] border border-dashed border-[rgba(54,51,46,.25)] dark:border-[rgba(255,255,255,.15)] text-[#8C857B] dark:text-night-text/50 hover:text-feitu-text dark:hover:text-night-text hover:border-[rgba(54,51,46,.5)] transition text-lg leading-none"
-      title="Novo workspace"
-    >+</button>
   </div>
 </template>

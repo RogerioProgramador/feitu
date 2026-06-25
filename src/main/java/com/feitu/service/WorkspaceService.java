@@ -1,5 +1,6 @@
 package com.feitu.service;
 
+import com.feitu.config.BusinessException;
 import com.feitu.config.ResourceNotFoundException;
 import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
@@ -42,7 +43,10 @@ public class WorkspaceService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
-        int proximaOrdem = workspaceRepository.countByUsuarioId(usuarioId) + 1;
+        int total = workspaceRepository.countByUsuarioId(usuarioId);
+        if (total >= 3) throw new BusinessException("Limite de 3 workspaces atingido");
+
+        int proximaOrdem = total + 1;
 
         Workspace ws = new Workspace();
         ws.setNome(req.nome());
@@ -79,6 +83,18 @@ public class WorkspaceService {
         }
         tarefaRepository.deleteAll(tarefas);
         workspaceRepository.delete(ws);
+    }
+
+    public void deletarTodos(UUID usuarioId) {
+        List<Workspace> workspaces = workspaceRepository.findByUsuarioIdOrderByOrdem(usuarioId);
+        for (Workspace ws : workspaces) {
+            List<Tarefa> tarefas = tarefaRepository.findByWorkspaceId(ws.getId());
+            for (Tarefa tarefa : tarefas) {
+                conclusaoRepository.deleteByTarefaId(tarefa.getId());
+            }
+            tarefaRepository.deleteAll(tarefas);
+            workspaceRepository.delete(ws);
+        }
     }
 
     private Workspace buscarDoUsuario(UUID id, UUID usuarioId) {

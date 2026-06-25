@@ -1,5 +1,6 @@
 package com.feitu.service;
 
+import com.feitu.config.BusinessException;
 import com.feitu.config.ResourceNotFoundException;
 import com.feitu.domain.Tarefa;
 import com.feitu.domain.Usuario;
@@ -89,6 +90,16 @@ class WorkspaceServiceTest {
         verify(conclusaoRepository).deleteByTarefaId(any());
         verify(tarefaRepository).deleteAll(List.of(tarefa));
         verify(workspaceRepository).delete(ws);
+    }
+
+    @Test
+    void criarComTresWorkspacesLancaBusinessException() {
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+        when(workspaceRepository.countByUsuarioId(usuarioId)).thenReturn(3);
+
+        assertThatThrownBy(() -> service.criar(usuarioId, new WorkspaceRequest("4º WS", "#A7C7E7")))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Limite");
     }
 
     @Test
