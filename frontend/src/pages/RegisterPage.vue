@@ -76,7 +76,6 @@ async function criar() {
               v-model="senha"
               type="password"
               required
-              minlength="8"
               placeholder="mín. 8 caracteres"
               class="w-full border border-[rgba(54,51,46,.12)] dark:border-[rgba(255,255,255,.08)] rounded-[13px] px-4 py-[11px] outline-none focus:border-feitu-blue-deep focus:ring-2 focus:ring-[rgba(94,139,182,.2)] text-[14px] bg-[#F7F4EE] dark:bg-night-card text-feitu-text dark:text-night-text placeholder:text-[#C4BDB0] transition"
             />

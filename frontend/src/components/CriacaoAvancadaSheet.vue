@@ -18,6 +18,7 @@ const horarioAtivo = ref(true)
 const hora = ref('07')
 const minuto = ref('00')
 const salvando = ref(false)
+const erro = ref('')
 
 const DIAS_LABEL = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 const DIAS_API   = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'] as const
@@ -50,6 +51,7 @@ function toggleTodosDias() {
 async function criar() {
   if (!podeSubmeter.value || salvando.value) return
   salvando.value = true
+  erro.value = ''
   try {
     const horario = horarioAtivo.value && tipo.value === 'RECORRENTE'
       ? `${hora.value.padStart(2, '0')}:${minuto.value.padStart(2, '0')}`
@@ -67,6 +69,8 @@ async function criar() {
       props.date,
     )
     emit('criada')
+  } catch (e: any) {
+    erro.value = e.response?.data?.detail ?? 'Erro ao criar tarefa'
   } finally {
     salvando.value = false
   }
@@ -194,6 +198,9 @@ async function criar() {
             />
           </div>
         </div>
+
+        <!-- Erro ao criar -->
+        <p v-if="erro" class="text-[12.5px] text-red-500 bg-red-50 dark:bg-red-950/30 rounded-[10px] px-3 py-2 mt-[14px]">{{ erro }}</p>
 
         <!-- Botão criar -->
         <button

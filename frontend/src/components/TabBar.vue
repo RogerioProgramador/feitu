@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 
 const store = useWorkspaceStore()
 
-const criando = ref(false)
+const criando = computed({
+  get: () => store.criandoNovo,
+  set: (v: boolean) => { store.criandoNovo = v },
+})
 const novoNome = ref('')
 
 const CORES = ['#A7C7E7', '#B5EAD7', '#FFDAC1', '#E2C6FF', '#FFD1DC', '#C7E6A7']

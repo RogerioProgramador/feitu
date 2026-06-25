@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import TabBar from '../components/TabBar.vue'
 import TaskList from '../components/TaskList.vue'
 import { hojeISO } from '../utils/formatarData'
 
 const wsStore = useWorkspaceStore()
-const router = useRouter()
 
 const hoje = hojeISO()
 
@@ -97,7 +95,7 @@ onMounted(() => wsStore.carregar())
           Organize suas tarefas por contexto — trabalho, estudos, casa.
         </p>
         <button
-          @click="router.push('/workspaces/new')"
+          @click="wsStore.criandoNovo = true"
           class="flex items-center gap-[9px] mt-[26px] px-[22px] py-[14px] rounded-[14px] bg-feitu-blue-deep text-white text-[15px] font-semibold shadow-[0_10px_24px_-10px_rgba(94,139,182,.6)]"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
