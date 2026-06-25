@@ -7,7 +7,8 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'html',
   use: {
     baseURL: process.env.BASE_URL ?? 'http://localhost:8080',
-    ...devices['iPhone 14'],  // app é mobile-first
+    ...devices['iPhone 14'],  // viewport mobile-first (390×844, touch, isMobile)
+    browserName: 'chromium',  // webkit não está disponível no runner de CI; chromium é suficiente para smoke
     locale: 'pt-BR',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
