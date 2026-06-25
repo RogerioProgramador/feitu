@@ -16,7 +16,7 @@ import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -52,8 +52,8 @@ class SegmentoTempoServiceTest {
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
         when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
-        when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
-                .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
+        when(conclusaoRepository.findTarefaIdsConcluidasByIds(Set.of(recorrente.getId()), hoje))
+                .thenReturn(Set.of(recorrente.getId()));
 
         DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
 
@@ -70,8 +70,8 @@ class SegmentoTempoServiceTest {
 
         when(tarefaRepository.findPontuaisDoUsuarioParaData(uid, hoje)).thenReturn(List.of(pontual));
         when(tarefaRepository.findRecorrentesDoUsuarioParaDia(uid, "TER")).thenReturn(List.of(recorrente));
-        when(conclusaoRepository.findByTarefaIdAndData(recorrente.getId(), hoje))
-                .thenReturn(Optional.of(new ConclusaoRecorrente(recorrente, hoje, java.time.LocalDateTime.now())));
+        when(conclusaoRepository.findTarefaIdsConcluidasByIds(Set.of(recorrente.getId()), hoje))
+                .thenReturn(Set.of(recorrente.getId()));
 
         DailySummaryResponse r = analyticsService.sumarioDiario(uid, hoje);
 
