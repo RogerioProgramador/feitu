@@ -102,15 +102,15 @@ PushSubscription    (id, usuario_id FK, endpoint, p256dh, auth)
 ## Comandos
 
 ```bash
-# Backend somente
-mvn compile -P backend-only
-mvn spring-boot:run -P backend-only -Dspring-boot.run.profiles=dev
+# Backend somente (executar a partir de backend/)
+cd backend && mvn compile -P backend-only
+cd backend && mvn spring-boot:run -P backend-only -Dspring-boot.run.profiles=dev
 
 # Testes
-mvn verify -P backend-only
+cd backend && mvn verify -P backend-only
 
 # Build completo (backend + frontend)
-mvn package
+cd backend && mvn package
 
 # Frontend isolado
 cd frontend && npm run dev        # dev server :5173, proxy /api → :8080
@@ -122,7 +122,7 @@ cd frontend && npm run test       # Vitest
 
 ## Critério de Done
 
-1. `mvn verify -P backend-only` — compile + todos os testes
+1. `cd backend && mvn verify -P backend-only` — compile + todos os testes
 2. `npm run typecheck` — zero erros de tipo
 3. Funcionalidade verificável manualmente em produção
 

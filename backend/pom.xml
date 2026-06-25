@@ -138,7 +138,7 @@
                         <configuration>
                             <executable>npm</executable>
                             <arguments><argument>install</argument></arguments>
-                            <workingDirectory>${project.basedir}/frontend</workingDirectory>
+                            <workingDirectory>${project.basedir}/../frontend</workingDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -148,7 +148,7 @@
                         <configuration>
                             <executable>npm</executable>
                             <arguments><argument>run</argument><argument>build</argument></arguments>
-                            <workingDirectory>${project.basedir}/frontend</workingDirectory>
+                            <workingDirectory>${project.basedir}/../frontend</workingDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -167,7 +167,7 @@
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/frontend/dist</directory>
+                                    <directory>${project.basedir}/../frontend/dist</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>

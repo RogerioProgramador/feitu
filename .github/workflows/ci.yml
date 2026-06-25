@@ -21,6 +21,7 @@ jobs:
 
       - name: Build e testes backend
         run: mvn verify -P backend-only -B -Dnet.bytebuddy.experimental=true
+        working-directory: backend
 
   frontend:
     name: Frontend (Node)

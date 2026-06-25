@@ -35,6 +35,7 @@ jobs:
 
       - name: Build artefato único (.jar)
         run: mvn package -P backend-only -DskipTests -B
+        working-directory: backend
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
