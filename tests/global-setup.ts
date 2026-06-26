@@ -18,6 +18,9 @@ export default async function globalSetup(): Promise<void> {
   const wsRes = await api.get('/api/workspaces', {
     headers: { Authorization: `Bearer ${token}` },
   })
+  if (!wsRes.ok()) {
+    throw new Error(`global-setup: GET /api/workspaces falhou (${wsRes.status()})`)
+  }
   const workspaces = (await wsRes.json()) as { id: string }[]
 
   if (workspaces.length === 0) {

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { login } from '../helpers/login'
 
 test('login inválido exibe mensagem de erro e permanece na tela', async ({ page }) => {
   await page.goto('/login')
@@ -7,7 +8,7 @@ test('login inválido exibe mensagem de erro e permanece na tela', async ({ page
   await page.click('button[type="submit"]')
 
   await expect(page.locator('p.text-red-500')).toBeVisible()
-  expect(page.url()).not.toContain('/workspaces')
+  await expect(page).not.toHaveURL(/workspaces/)
 })
 
 test('login válido navega para home', async ({ page }) => {
@@ -18,13 +19,9 @@ test('login válido navega para home', async ({ page }) => {
     return
   }
 
-  await page.goto('/login')
-  await page.fill('input[type="email"]', email)
-  await page.fill('input[type="password"]', senha)
-  await page.click('button[type="submit"]')
+  await login(page)
 
-  await page.waitForURL('**/workspaces')
-  expect(page.url()).toContain('/workspaces')
+  await expect(page).toHaveURL(/workspaces/)
 })
 
 test('back após login não retorna para /login', async ({ page }) => {
@@ -35,12 +32,7 @@ test('back após login não retorna para /login', async ({ page }) => {
     return
   }
 
-  await page.goto('/login')
-  await page.fill('input[type="email"]', email)
-  await page.fill('input[type="password"]', senha)
-  await page.click('button[type="submit"]')
-  await page.waitForURL('**/workspaces')
-
+  await login(page)
   await page.goBack()
 
   await expect(page).not.toHaveURL(/\/login/)
