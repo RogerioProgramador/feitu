@@ -30,7 +30,8 @@ test('logout redireciona para /login e bloqueia área autenticada', async ({ pag
 
   await expect(page).toHaveURL(/\/login/)
 
-  // Guard de rota deve impedir acesso sem autenticação
-  await page.goto('/workspaces')
+  // 'commit' evita ERR_ABORTED: router guard do Vue cancela a navegação
+  // client-side antes do load event, o que derruba waitUntil padrão
+  await page.goto('/workspaces', { waitUntil: 'commit' })
   await expect(page).toHaveURL(/\/login/)
 })
