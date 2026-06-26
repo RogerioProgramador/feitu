@@ -50,7 +50,7 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException("Código de convite inválido ou já utilizado"));
 
         if (usuarioRepository.existsByEmail(req.email())) {
-            throw new BusinessException("E-mail já cadastrado: " + req.email());
+            throw new BusinessException("E-mail já cadastrado");
         }
 
         invite.setAtivo(false);
