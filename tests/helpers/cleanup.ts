@@ -10,6 +10,14 @@ interface WorkspaceResponse {
 }
 
 /**
+ * Retorna hoje no fuso America/Sao_Paulo (UTC-3), igual ao hojeISO() do frontend.
+ * O app cria tarefas com essa data — o cleanup precisa usar a mesma referência.
+ */
+export function hojeUTC3(): string {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' })
+}
+
+/**
  * Remove via API todas as tarefas cujo nome começa com 'E2E-'.
  * Chamado no global-setup para garantir estado limpo antes de cada run.
  */
@@ -30,9 +38,11 @@ export async function limparTarefasE2E(): Promise<void> {
     if (!wsRes.ok()) return
     const workspaces = (await wsRes.json()) as WorkspaceResponse[]
 
+    // usa a data em UTC-3, igual ao hojeISO() do frontend
+    const date = hojeUTC3()
+
     for (const ws of workspaces) {
-      // sem ?date → backend usa LocalDate.now() (hoje no servidor)
-      const tasksRes = await api.get(`/api/workspaces/${ws.id}/tarefas`, { headers })
+      const tasksRes = await api.get(`/api/workspaces/${ws.id}/tarefas`, { headers, params: { date } })
       if (!tasksRes.ok()) continue
       const tasks = (await tasksRes.json()) as TaskResponse[]
       for (const task of tasks) {

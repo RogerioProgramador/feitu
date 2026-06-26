@@ -1,5 +1,6 @@
 import { test, expect, request } from '@playwright/test'
 import { login } from '../helpers/login'
+import { hojeUTC3 } from '../helpers/cleanup'
 
 async function deletarTarefaPorNome(nome: string): Promise<void> {
   const baseURL = process.env.BASE_URL ?? 'http://localhost:8080'
@@ -18,8 +19,11 @@ async function deletarTarefaPorNome(nome: string): Promise<void> {
     if (!wsRes.ok()) return
     const workspaces = (await wsRes.json()) as { id: string }[]
 
+    // usa a data em UTC-3, igual ao hojeISO() do frontend
+    const date = hojeUTC3()
+
     for (const ws of workspaces) {
-      const tasksRes = await api.get(`/api/workspaces/${ws.id}/tarefas`, { headers })
+      const tasksRes = await api.get(`/api/workspaces/${ws.id}/tarefas`, { headers, params: { date } })
       if (!tasksRes.ok()) continue
       const tasks = (await tasksRes.json()) as { id: string; nome: string }[]
       for (const task of tasks) {
