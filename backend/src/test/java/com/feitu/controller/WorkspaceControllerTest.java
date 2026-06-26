@@ -37,11 +37,11 @@ class WorkspaceControllerTest {
     void setup() throws Exception {
         mvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(new RegisterRequest("ws@test.com", "senha1234", "TEST-CODE"))));
+                .content(json.writeValueAsString(new RegisterRequest("ws@test.com", "senha12345x", "TEST-CODE"))));
 
         MvcResult result = mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new LoginRequest("ws@test.com", "senha1234"))))
+                        .content(json.writeValueAsString(new LoginRequest("ws@test.com", "senha12345x"))))
                 .andReturn();
 
         token = json.readTree(result.getResponse().getContentAsString()).get("token").asText();

@@ -42,11 +42,11 @@ class PushControllerTest {
     void setup() throws Exception {
         mvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(new RegisterRequest("push@test.com", "senha1234", "TEST-CODE"))));
+                .content(json.writeValueAsString(new RegisterRequest("push@test.com", "senha12345x", "TEST-CODE"))));
 
         MvcResult login = mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new LoginRequest("push@test.com", "senha1234"))))
+                        .content(json.writeValueAsString(new LoginRequest("push@test.com", "senha12345x"))))
                 .andReturn();
         token = json.readTree(login.getResponse().getContentAsString()).get("token").asText();
     }

@@ -11,7 +11,6 @@ primary_region = "gru"
   H2_CONSOLE_ENABLED = "false"
   SPRING_PROFILES_ACTIVE = "prod"
   DB_PATH = "/data/feitu-v2"
-  SPRING_JPA_HIBERNATE_DDL_AUTO = "validate"
 
 [[mounts]]
   source = "feitu_data"

@@ -1,3 +1,3 @@
 package com.feitu.dto;
 
-public record AuthResponse(String token) {}
+public record AuthResponse(String token, String refreshToken) {}

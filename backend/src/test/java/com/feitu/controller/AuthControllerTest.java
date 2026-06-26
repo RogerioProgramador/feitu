@@ -32,35 +32,35 @@ class AuthControllerTest {
     void registroRetorna201ComToken() throws Exception {
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("a@test.com", "senha1234", "TEST-CODE"))))
+                        .content(json.writeValueAsString(new RegisterRequest("a@test.com", "senha12345x", "TEST-CODE"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token", notNullValue()));
     }
 
     @Test
     void loginRetornaToken() throws Exception {
-        registrar("b@test.com", "senha1234");
+        registrar("b@test.com", "senha12345x");
 
         mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new LoginRequest("b@test.com", "senha1234"))))
+                        .content(json.writeValueAsString(new LoginRequest("b@test.com", "senha12345x"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()));
     }
 
     @Test
     void registroDuplicadoRetorna422() throws Exception {
-        registrar("dup@test.com", "senha1234");
+        registrar("dup@test.com", "senha12345x");
 
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("dup@test.com", "senha1234", "INVALID"))))
+                        .content(json.writeValueAsString(new RegisterRequest("dup@test.com", "senha12345x", "INVALID"))))
                 .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
     void loginSenhaErradaRetorna422() throws Exception {
-        registrar("err@test.com", "senha1234");
+        registrar("err@test.com", "senha12345x");
 
         mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ class AuthControllerTest {
     void emailInvalidoRetorna400() throws Exception {
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new RegisterRequest("nao-e-email", "senha1234", "TEST-CODE"))))
+                        .content(json.writeValueAsString(new RegisterRequest("nao-e-email", "senha12345x", "TEST-CODE"))))
                 .andExpect(status().isBadRequest());
     }
 
