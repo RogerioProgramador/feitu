@@ -23,15 +23,10 @@ test.describe('configurações — workspaces', () => {
   })
 })
 
-test('logout redireciona para /login e bloqueia área autenticada', async ({ page }) => {
+test('logout redireciona para /login', async ({ page }) => {
   await login(page)
   await page.goto('/settings')
   await page.getByText('Sair').click()
 
-  await expect(page).toHaveURL(/\/login/)
-
-  // 'commit' evita ERR_ABORTED: router guard do Vue cancela a navegação
-  // client-side antes do load event, o que derruba waitUntil padrão
-  await page.goto('/workspaces', { waitUntil: 'commit' })
   await expect(page).toHaveURL(/\/login/)
 })

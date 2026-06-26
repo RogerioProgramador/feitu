@@ -24,6 +24,14 @@ test('login válido navega para home', async ({ page }) => {
   await expect(page).toHaveURL(/workspaces/)
 })
 
+test('rota protegida redireciona para /login sem autenticação', async ({ page }) => {
+  // Contexto fresco (sem token, sem Service Worker de sessão anterior)
+  // garante que o guard de rota do Vue funciona para usuários não autenticados
+  await page.goto('/workspaces')
+
+  await expect(page).toHaveURL(/\/login/)
+})
+
 test('back após login não retorna para /login', async ({ page }) => {
   const email = process.env.E2E_EMAIL
   const senha = process.env.E2E_PASSWORD
