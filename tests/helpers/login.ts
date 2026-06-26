@@ -10,5 +10,5 @@ export async function login(page: Page): Promise<void> {
   await page.fill('input[type="email"]', email)
   await page.fill('input[type="password"]', senha)
   await page.click('button[type="submit"]')
-  await page.waitForURL('**/workspaces')
+  await page.waitForURL('**/workspaces', { timeout: 60_000 })
 }

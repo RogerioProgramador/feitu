@@ -42,7 +42,6 @@ test('back após login não retorna para /login', async ({ page }) => {
   await page.waitForURL('**/workspaces')
 
   await page.goBack()
-  await page.waitForTimeout(1000)
 
-  expect(page.url()).not.toContain('/login')
+  await expect(page).not.toHaveURL(/\/login/)
 })

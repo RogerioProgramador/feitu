@@ -25,3 +25,11 @@ test('overflow horizontal ausente na página de analytics', async ({ page }) => 
   )
   expect(overflow).toBeLessThanOrEqual(2)
 })
+
+test('analytics exibe estado vazio quando não há tarefas no dia', async ({ page }) => {
+  await login(page)
+  await page.locator('a[title="Resumo"]').click()
+  await page.waitForURL('**/analytics')
+
+  await expect(page.getByText('Nenhuma tarefa neste dia')).toBeVisible()
+})
