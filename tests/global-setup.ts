@@ -1,4 +1,5 @@
 import { request } from '@playwright/test'
+import { limparTarefasE2E } from './helpers/cleanup'
 
 export default async function globalSetup(): Promise<void> {
   const baseURL = process.env.BASE_URL ?? 'http://localhost:8080'
@@ -34,4 +35,7 @@ export default async function globalSetup(): Promise<void> {
   }
 
   await api.dispose()
+
+  // Remove tarefas E2E residuais de runs anteriores que falharam sem cleanup
+  await limparTarefasE2E()
 }
