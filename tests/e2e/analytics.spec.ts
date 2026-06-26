@@ -63,6 +63,8 @@ test('analytics exibe estado tudo feito quando todas as tarefas são concluídas
   const checkbox = row.getByRole('button').first()
   await checkbox.click()
   await expect(checkbox).toHaveClass(/bg-feitu-teal/)
+  // aguarda o PATCH de toggle chegar ao banco antes de abrir analytics
+  await page.waitForLoadState('networkidle')
 
   await page.locator('a[title="Resumo"]').click()
   await page.waitForURL('**/analytics')
